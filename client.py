@@ -340,7 +340,7 @@ def use_data(data):
     # ...
 
 n = Network()
-player_id = pickle.loads(n.getId()).id
+player_id = n.getId().id
 #info = pickle.loads(sv_data)
 # players = data.players
 #Globals.agars = sv_data.agars
