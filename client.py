@@ -113,7 +113,7 @@ def game_draw():
 
 def game_tick():
 
-    player.update_target()
+    player.update_target(Globals.camera, Globals.agars)
     info.target = player.target
 
     # global draw_time
