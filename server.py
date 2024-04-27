@@ -164,19 +164,6 @@ def game_tick():
     info.viruses = copy.deepcopy(Globals.viruses)
     info.brown_viruses = copy.deepcopy(Globals.brown_viruses)
     info.ejected = copy.deepcopy(Globals.ejected)
-    # info.players = copy.deepcopy(Globals.players)
-    # info.cells = copy.deepcopy(Globals.agars)
-    # info.agars = copy.deepcopy(Globals.agars)
-    
-
-
-
-
-
-
-
-
-
 
 def near_cells(thing):
     for cell in Globals.cells:
