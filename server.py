@@ -366,18 +366,17 @@ print("Waiting for a connection, Server Started")
 def threaded_client(conn, player):
     
     conn.send(pickle.dumps(info))
-    print(info)
 
     while True:
         try:
-            data = conn.recv(4096*1024)
+            data = pickle.loads(conn.recv(4096*1024))
 
             if not data:
                 print("Disconnected")
                 break
             else:
                 print("Recieved: ", data)
-                print("Sending info")
+                print("Sending :", info)
             
             conn.send(pickle.dumps(info))
         except:
