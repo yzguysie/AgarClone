@@ -389,7 +389,7 @@ def threaded_client(conn, player_id):
                         if cl_data.split:
                             p.split()
                         if cl_data.eject:
-                            p.eject()
+                            p.eject_mass()
                         p.target = cl_data.target
                 print("Recieved: ", cl_data)
                 print("Sending :", info)

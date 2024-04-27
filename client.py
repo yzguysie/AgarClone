@@ -444,10 +444,9 @@ while playing:
 
             if event.key == pygame.K_SPACE:
                 info.split = True
-                info.eject = True
 
             if event.key == pygame.K_w:
-                pass
+                info.eject = True
 
             if event.key == pygame.K_f:
                 for p in Globals.players:
