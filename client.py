@@ -334,6 +334,9 @@ def use_data(data):
     Globals.viruses = data.viruses
     Globals.brown_viruses = data.brown_viruses
     Globals.ejected = data.ejected
+    Globals.cells = data.ejected
+    Globals.players = data.players
+
     # ...
 
 n = Network()
