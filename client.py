@@ -340,7 +340,7 @@ def use_data(data):
     # ...
 
 n = Network()
-use_data(n.send(player))
+player_id = pickle.loads(n.getId()).id
 #info = pickle.loads(sv_data)
 # players = data.players
 #Globals.agars = sv_data.agars
@@ -357,16 +357,10 @@ while playing:
 
 
 
+
     for p in Globals.players:
-        if len(p.cells) == 0:
-            if p.mode == "player":
-                new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.light_blue, p)
-            elif p.mode == "minion":
-                new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), minion_start_mass, Colors.green, p)
-            else:
-                new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), bot_start_mass, Colors.red, p)
-            Globals.cells.append(new_cell)
-            p.cells.append(new_cell)
+        if p.id == player_id:
+            player = p
              
 
 

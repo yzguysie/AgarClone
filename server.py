@@ -315,10 +315,10 @@ clock = pygame.time.Clock()
 
 player = Player("player", Colors.blue)
 Globals.players.append(player)
-for i in range(bot_count):
-    Globals.players.append(Player("bot", Colors.red))
-for i in range(minion_count):
-    Globals.players.append(Player("minion", Colors.green))
+# for i in range(bot_count):
+#     Globals.players.append(Player("bot", Colors.red))
+# for i in range(minion_count):
+#     Globals.players.append(Player("minion", Colors.green))
 
 player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
 
@@ -368,9 +368,11 @@ s.listen()
 print("Waiting for a connection, Server Started")
 
 
-def threaded_client(conn, player):
+def threaded_client(conn, player_id):
     
-    conn.send(pickle.dumps(info))
+    new_player = Player("player", Colors.yellow)
+    Globals.players.append(new_player)
+    conn.send(pickle.dumps(new_player))
 
     while True:
         try:
