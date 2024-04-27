@@ -329,16 +329,18 @@ playing = True
 aa_text = True
 
 def use_data(data):
-    info = pickle.loads(data)
     # players = data.players
-    Globals.agars = info.agars
+    Globals.agars = data.agars
+    Globals.viruses = data.viruses
+    Globals.brown_viruses = data.brown_viruses
+    Globals.ejected = data.ejected
     # ...
 
 n = Network()
-sv_data = n.send(player) 
+use_data(n.send(player))
 #info = pickle.loads(sv_data)
 # players = data.players
-Globals.agars = sv_data.agars
+#Globals.agars = sv_data.agars
 
 while playing:
     start = time.time()
@@ -348,10 +350,7 @@ while playing:
     
     window.fill(background_color)
 
-    sv_data = n.send(player) 
-    #
-    # players = data.players
-    Globals.agars = sv_data.agars
+    use_data(n.send(player))
 
 
 
