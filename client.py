@@ -111,8 +111,55 @@ def game_draw():
         obj.draw(window, Globals.camera)
     draw_time += time.time()-timer_start
 
-def game_tick():
 
+def server_tick():
+    global draw_time
+    global cell_time
+    global agar_time
+    global virus_time
+    global ejected_time
+    global info
+
+    target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
+    target_camera_x = target_camera_x/Globals.camera.scale-width/2
+    target_camera_y = target_camera_y/Globals.camera.scale-height/2
+    #camera.x += (target_camera_x-camera.x)/1
+    #camera.y += (target_camera_y-camera.y)/1
+    Globals.camera.set_pos(target_camera_x, target_camera_y)
+    Globals.camera.tick()
+
+    timer_start = time.time()
+
+    #Bot AI (I think idk I wrote this like 2 yrs ago)
+    # for bot in players:
+    #     if bot != players[player]: #Make sure not to control player, only bots
+    #         for cell in bot:
+    #             target_cell = cell.target
+    #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
+                
+    #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
+    #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
+    #                         for bruh in bot:
+    #                                 bruh.split()
+    #                         break
+
+    
+    all_objs = list(all_drawable())
+    for thing in all_objs:
+        if type(thing) != Cell:
+            thing.tick()
+
+    timer_start = time.time()
+
+    player.update_target(Globals.camera, Globals.agars)
+    for player_ in Globals.players:
+        #player_.update_target(Globals.camera, Globals.agars)
+        player_.tick()
+
+    cell_time += time.time()-timer_start
+
+def game_tick():
+    server_tick()
     player.update_target(Globals.camera, Globals.agars)
     info.target = player.target
 
@@ -359,7 +406,7 @@ player_id = n.getId().id
 #info = pickle.loads(sv_data)
 # players = data.players
 #Globals.agars = sv_data.agars
-
+fps = 30
 while playing:
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')

@@ -342,7 +342,9 @@ aa_text = True
 
 info = ServerInfo()
 
-server = "192.168.0.180"
+server = ""
+server_ip = socket.gethostbyname(server)
+print(server_ip)
 port = 5555
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
