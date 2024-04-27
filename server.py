@@ -365,7 +365,8 @@ print("Waiting for a connection, Server Started")
 
 def threaded_client(conn, player):
     
-    conn.send(pickle.dumps(info.agars))
+    conn.send(pickle.dumps(info))
+    print(info)
 
     reply = ""
     while True:
@@ -380,7 +381,7 @@ def threaded_client(conn, player):
                 print("Recieved: ", reply)
                 print("Sending info")
             
-            conn.send(pickle.dumps(info.agars))
+            conn.send(pickle.dumps(info))
         except:
             break
     print("Lost conection")
