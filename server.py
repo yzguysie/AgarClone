@@ -245,9 +245,9 @@ player_recombine_time = config.getfloat('settings', 'player_recombine_time')
 player_eject_min_mass = config.getint('settings', 'player_eject_min_mass')
 player_split_min_mass = config.getint('settings', 'player_split_min_mass')
 
-agar_min_mass = 1
-agar_max_mass = 4
-max_agars = 3000
+#agar_min_mass = 1
+#agar_max_mass = 4
+#max_agars = 3000
 
 ejected_size = config.getint('settings', 'ejected_size')
 ejected_loss = config.getint('settings', 'ejected_loss')
@@ -287,9 +287,9 @@ ejected_to_calculate = set()
 
 
 
-font = 'arial'
-font_width = int(width/100+1)
-dialogue_font = pygame.font.SysFont(font, font_width)
+Globals.font = 'arial'
+Globals.font_width = int(width/100+1)
+Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 objects = []
 
 pygame.display.set_caption("Agar.io Clone")
@@ -518,22 +518,22 @@ while playing:
     game_draw()
 
 
-    dialogue = dialogue_font.render("Mass: " + str(int(total_mass+.5)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("Mass: " + str(int(total_mass+.5)), aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    dialogue = dialogue_font.render("FPS: " + str(fps_), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("FPS: " + str(fps_), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 100))
     window.blit(dialogue, dialogue_rect)
    
-    dialogue = dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 125))
     window.blit(dialogue, dialogue_rect)
-    dialogue = dialogue_font.render("PLAYERS: " + str(len(Globals.players)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("PLAYERS: " + str(len(Globals.players)), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 150))
     window.blit(dialogue, dialogue_rect)
-    dialogue = dialogue_font.render("AGARS: " + str(len(Globals.agars)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("AGARS: " + str(len(Globals.agars)), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 175))
     window.blit(dialogue, dialogue_rect)
-    dialogue = dialogue_font.render("Ejected: " + str(len(Globals.ejected)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("Ejected: " + str(len(Globals.ejected)), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 200))
     window.blit(dialogue, dialogue_rect)
 

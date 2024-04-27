@@ -27,18 +27,18 @@ class Cell(Drawable):
     def draw(self, window, camera):
         super().draw(window,camera)
 
-        # player_font_width = int(self.radius/camera.scale/2+1)
-        # dialogue_font = pygame.font.SysFont(font, player_font_width)
+        player_font_width = int(self.radius/camera.scale/2+1)
+        dialogue_font = pygame.font.SysFont(Globals.font, player_font_width)
         
-        # # Draw Player Name
-        # dialogue = dialogue_font.render(self.player.mode, aa_text, Colors.white)
-        # dialogue_rect = dialogue.get_rect(center = (round(self.x/camera.scale-camera.x), round(self.y/camera.scale-camera.y)))
-        # window.blit(dialogue, dialogue_rect)
+        # Draw Player Name
+        dialogue = dialogue_font.render(self.player.mode, True, (255, 255, 255))
+        dialogue_rect = dialogue.get_rect(center = (round(self.x/camera.scale-camera.x), round(self.y/camera.scale-camera.y)))
+        window.blit(dialogue, dialogue_rect)
 
-        # # Draw cell mass
-        # dialogue = dialogue_font.render(str(int(self.mass)), aa_text, Colors.white)
-        # dialogue_rect = dialogue.get_rect(center = (round(self.x/camera.scale-camera.x), round(self.y/camera.scale-camera.y+player_font_width)))
-        # window.blit(dialogue, dialogue_rect)
+        # Draw cell mass
+        dialogue = dialogue_font.render(str(int(self.mass)), True, (255, 255, 255))
+        dialogue_rect = dialogue.get_rect(center = (round(self.x/camera.scale-camera.x), round(self.y/camera.scale-camera.y+player_font_width)))
+        window.blit(dialogue, dialogue_rect)
 
 
     def move(self):

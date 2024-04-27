@@ -1,15 +1,14 @@
 from common.camera import Camera
 from configparser import ConfigParser
+import pygame
+pygame.font.init()
 class Globals:
+    font = 'arial'
+    font_width = int(1280/100+1)
+    dialogue_font = pygame.font.SysFont(font, font_width)
     drawable_count = 0
-    player_min_mass = 43
     objects_to_delete = set()
     camera = Camera()
-    fps = 30
-    fps_ = 30
-    gamespeed = 1/fps
-    border_width = 500
-    border_height = 500
     agars = set()
     cells = []
     ejected = []
@@ -17,10 +16,6 @@ class Globals:
     brown_viruses = []
     players = []
     smooth_fix_limit = 4
-    player_decay_rate = .05
-    player_max_cells = 16
-    player_split_min_mass = 43
-    player_speed = 1
     config = ConfigParser()
 
     # parse existing file
@@ -28,6 +23,8 @@ class Globals:
 
     # read values from a section
     fps = config.getint('settings', 'fps')
+    fps_ = fps
+    gamespeed = 1/fps
     speed = config.getfloat('settings', 'speed')
 
     gamemode = config.getint('settings', 'gamemode')
