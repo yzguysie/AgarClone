@@ -60,9 +60,9 @@ class Globals:
     player_eject_min_mass = config.getint('settings', 'player_eject_min_mass')
     player_split_min_mass = config.getint('settings', 'player_split_min_mass')
 
-    agar_min_mass = 1
-    agar_max_mass = 4
-    max_agars = 3000
+    agar_min_mass = config.getint('settings', 'agar_min_mass')
+    agar_max_mass = config.getint('settings', 'agar_max_mass')
+    max_agars = config.getint('settings', 'max_agars')
 
     ejected_size = config.getint('settings', 'ejected_size')
     ejected_loss = config.getint('settings', 'ejected_loss')

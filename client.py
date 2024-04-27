@@ -384,14 +384,14 @@ while playing:
              
 
 
-    if len(Globals.viruses) < virus_count:
-        new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
-        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
-            new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
-        Globals.viruses.append(new_virus)
+    # if len(Globals.viruses) < virus_count:
+    #     new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
+    #     while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
+    #         new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
+    #     Globals.viruses.append(new_virus)
 
-    if len(Globals.brown_viruses) < brown_virus_count:
-        Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
+    # if len(Globals.brown_viruses) < brown_virus_count:
+    #     Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
    
     # if len(Globals.agars) < max_agars:
     #     if frames%int(len(Globals.agars)/25000*fps+1) == 0:
@@ -448,14 +448,6 @@ while playing:
             if event.key == pygame.K_w:
                 info.eject = True
 
-            if event.key == pygame.K_f:
-                for p in Globals.players:
-                    if p.mode == "minion":
-                        p.split()
-            if event.key == pygame.K_g:
-                for p in Globals.players:
-                    if p.mode == "minion":
-                        p.eject_mass()
             if event.key == pygame.K_F11:
                 if width == 1920:
                         width, height = 1280, 720
@@ -463,11 +455,9 @@ while playing:
                         width, height = 1920, 1080
                 window = pygame.display.set_mode([width, height])
     if pygame.key.get_pressed()[pygame.K_e]:
-        for thing in player.cells:
-            if thing.mass > player_eject_min_mass and thing.mass > ejected_loss:
-                thing.eject_mass()
+        info.eject = True
     if pygame.key.get_pressed()[pygame.K_z]:
-        player.split()
+        info.split = True
                 
 
     start_tick_time = time.time()
@@ -508,23 +498,23 @@ while playing:
     frames += 1
 
 
-    Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
-    Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
-    Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
-    Globals.viruses = [virus for virus in Globals.viruses if virus.id not in Globals.objects_to_delete]
-    Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
-    objects = [obj for obj in objects if obj.id not in Globals.objects_to_delete]
-    for cell in Globals.cells:
-        if cell.mass > player_max_cell_mass:
-            cell.split()
-    for i in range(len(Globals.players)):
-        thing = player.cells
-        if len(thing) < 1:
-             Globals.cells.append(Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.red, Globals.players[i]))
-    for p in Globals.players:
-        p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
+    # Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
+    # Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
+    # Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
+    # Globals.viruses = [virus for virus in Globals.viruses if virus.id not in Globals.objects_to_delete]
+    # Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
+    # objects = [obj for obj in objects if obj.id not in Globals.objects_to_delete]
+    # for cell in Globals.cells:
+    #     if cell.mass > player_max_cell_mass:
+    #         cell.split()
+    # for i in range(len(Globals.players)):
+    #     thing = player.cells
+    #     if len(thing) < 1:
+    #          Globals.cells.append(Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.red, Globals.players[i]))
+    # for p in Globals.players:
+    #     p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
 
-    Globals.objects_to_delete = set()
+    # Globals.objects_to_delete = set()
 
    
 

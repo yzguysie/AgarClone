@@ -373,20 +373,23 @@ def threaded_client(conn, player_id):
             else:
                 for p in Globals.players:
                     if p.id == new_player.id:
+                        p.target = cl_data.target
+                        for cell in p.cells:
+                            cell.target = p.target
                         if cl_data.split:
                             p.split()
                         if cl_data.eject:
                             p.eject_mass()
-                        p.target = cl_data.target
-                print("Recieved: ", cl_data)
-                print("Sending :", info)
+                        
+                # print("Recieved: ", cl_data)
+                # print("Sending :", info)
             
             conn.send(pickle.dumps(info))
         except:
             break
     print("Lost conection")
     conn.close()
-
+    return
 
 
 def handle_connections(useless1, useless2):
