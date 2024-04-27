@@ -1,4 +1,4 @@
-class Info:
+class ServerInfo:
     agars = set()
     cells = []
     ejected = []

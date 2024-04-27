@@ -23,7 +23,8 @@ from common.drawable import Drawable
 from common.globals import Globals
 from common.virus import Virus
 from common.brownvirus import BrownVirus
-from common.serverinfo import Info
+from common.serverinfo import ServerInfo
+from common.clientinfo import ClientInfo
 import cProfile
 import re
 
@@ -111,48 +112,52 @@ def game_draw():
     draw_time += time.time()-timer_start
 
 def game_tick():
-    global draw_time
-    global cell_time
-    global agar_time
-    global virus_time
-    global ejected_time
 
-    target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-    target_camera_x = target_camera_x/Globals.camera.scale-width/2
-    target_camera_y = target_camera_y/Globals.camera.scale-height/2
-    #camera.x += (target_camera_x-camera.x)/1
-    #camera.y += (target_camera_y-camera.y)/1
-    Globals.camera.set_pos(target_camera_x, target_camera_y)
-    Globals.camera.tick()
+    player.update_target()
+    info.target = player.target
 
-    timer_start = time.time()
+    # global draw_time
+    # global cell_time
+    # global agar_time
+    # global virus_time
+    # global ejected_time
 
-    #Bot AI (I think idk I wrote this like 2 yrs ago)
-    # for bot in players:
-    #     if bot != players[player]: #Make sure not to control player, only bots
-    #         for cell in bot:
-    #             target_cell = cell.target
-    #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
+    # target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
+    # target_camera_x = target_camera_x/Globals.camera.scale-width/2
+    # target_camera_y = target_camera_y/Globals.camera.scale-height/2
+    # #camera.x += (target_camera_x-camera.x)/1
+    # #camera.y += (target_camera_y-camera.y)/1
+    # Globals.camera.set_pos(target_camera_x, target_camera_y)
+    # Globals.camera.tick()
+
+    # timer_start = time.time()
+
+    # #Bot AI (I think idk I wrote this like 2 yrs ago)
+    # # for bot in players:
+    # #     if bot != players[player]: #Make sure not to control player, only bots
+    # #         for cell in bot:
+    # #             target_cell = cell.target
+    # #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
                 
-    #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
-    #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
-    #                         for bruh in bot:
-    #                                 bruh.split()
-    #                         break
+    # #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
+    # #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
+    # #                         for bruh in bot:
+    # #                                 bruh.split()
+    # #                         break
 
     
-    all_objs = list(all_drawable())
-    for thing in all_objs:
-        if type(thing) != Cell:
-            thing.tick()
+    # all_objs = list(all_drawable())
+    # for thing in all_objs:
+    #     if type(thing) != Cell:
+    #         thing.tick()
 
-    timer_start = time.time()
+    # timer_start = time.time()
 
-    for player_ in Globals.players:
-        player_.update_target(Globals.camera, Globals.agars)
-        player_.tick()
+    # for player_ in Globals.players:
+    #     player_.update_target(Globals.camera, Globals.agars)
+    #     player_.tick()
 
-    cell_time += time.time()-timer_start
+    # cell_time += time.time()-timer_start
 
 
 
@@ -328,6 +333,12 @@ tick_time = 0
 playing = True
 aa_text = True
 
+
+
+info = ClientInfo()
+
+
+
 def use_data(data):
     # players = data.players
     Globals.agars = data.agars
@@ -353,7 +364,9 @@ while playing:
     
     window.fill(background_color)
 
-    use_data(n.send(player))
+
+
+    use_data(n.send(info))
 
 
 
@@ -361,6 +374,7 @@ while playing:
     for p in Globals.players:
         if p.id == player_id:
             player = p
+
              
 
 
@@ -423,10 +437,10 @@ while playing:
                 break
 
             if event.key == pygame.K_SPACE:
-                player.split()
+                info.split = True
 
             if event.key == pygame.K_w:
-                player.eject_mass()
+                info.eject = True
 
             if event.key == pygame.K_f:
                 for p in Globals.players:

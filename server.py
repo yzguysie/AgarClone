@@ -24,7 +24,8 @@ from common.globals import Globals
 from common.virus import Virus
 from common.brownvirus import BrownVirus
 
-from common.serverinfo import Info
+from common.serverinfo import ServerInfo
+from common.clientinfo import ClientInfo
 
 
 """
@@ -351,7 +352,7 @@ aa_text = True
 
 
 
-info = Info()
+info = ServerInfo()
 
 server = "192.168.0.180"
 port = 5555
@@ -376,13 +377,20 @@ def threaded_client(conn, player_id):
 
     while True:
         try:
-            data = pickle.loads(conn.recv(4096*1024))
+            cl_data = pickle.loads(conn.recv(4096*1024))
 
-            if not data:
+            if not cl_data:
                 print("Disconnected")
                 break
             else:
-                print("Recieved: ", data)
+                for p in Globals.players:
+                    if p.id == new_player.id:
+                        if cl_data.split:
+                            p.split()
+                        if cl_data.eject:
+                            p.eject()
+                        p.target = cl_data.target
+                print("Recieved: ", cl_data)
                 print("Sending :", info)
             
             conn.send(pickle.dumps(info))

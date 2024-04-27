@@ -1,7 +1,9 @@
 import pygame
-
+from common.globals import Globals
 class Player:
     def __init__(self, mode, color):
+        self.id = Globals.drawable_count
+        Globals.drawable_count += 1
         self.mode = mode
         self.color = color
         self.max_cells = 16
@@ -13,6 +15,10 @@ class Player:
     def tick(self):
         for cell in self.cells:
             cell.tick()
+
+    def draw(self):
+        for cell in self.cells:
+            cell.draw()
 
     def split(self):
         for i in range(len(self.cells)):
