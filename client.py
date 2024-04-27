@@ -405,7 +405,7 @@ while playing:
 
     target_scale/= max(len(player.cells)**(1/1.5), 1)
 
-    Globals.camera.set_scale(1)
+    Globals.camera.set_scale(target_scale)
 
     total_mass = sum(cell.mass for cell in player.cells)
 

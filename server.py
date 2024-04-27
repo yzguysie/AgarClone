@@ -150,8 +150,9 @@ def game_tick():
 
     timer_start = time.time()
 
+    player.update_target(Globals.camera, Globals.agars)
     for player_ in Globals.players:
-        player_.update_target(Globals.camera, Globals.agars)
+        #player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
 
     cell_time += time.time()-timer_start
