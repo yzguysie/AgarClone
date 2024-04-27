@@ -159,7 +159,6 @@ def server_tick():
     cell_time += time.time()-timer_start
 
 def game_tick():
-    server_tick()
     player.update_target(Globals.camera, Globals.agars)
     info.target = player.target
 
