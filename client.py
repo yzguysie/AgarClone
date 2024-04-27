@@ -116,19 +116,23 @@ def game_tick():
     player.update_target(Globals.camera, Globals.agars)
     info.target = player.target
 
+
     # global draw_time
     # global cell_time
     # global agar_time
     # global virus_time
     # global ejected_time
 
-    # target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-    # target_camera_x = target_camera_x/Globals.camera.scale-width/2
-    # target_camera_y = target_camera_y/Globals.camera.scale-height/2
-    # #camera.x += (target_camera_x-camera.x)/1
-    # #camera.y += (target_camera_y-camera.y)/1
-    # Globals.camera.set_pos(target_camera_x, target_camera_y)
-    # Globals.camera.tick()
+    try:
+        target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
+        target_camera_x = target_camera_x/Globals.camera.scale-width/2
+        target_camera_y = target_camera_y/Globals.camera.scale-height/2
+        #camera.x += (target_camera_x-camera.x)/1
+        #camera.y += (target_camera_y-camera.y)/1
+        Globals.camera.set_pos(target_camera_x, target_camera_y)
+        Globals.camera.tick()
+    except:
+        pass
 
     # timer_start = time.time()
 
@@ -367,6 +371,8 @@ while playing:
 
 
     use_data(n.send(info))
+    info.split = False
+    info.eject = False
 
 
 
