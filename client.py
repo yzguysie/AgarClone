@@ -7,6 +7,7 @@ from configparser import ConfigParser
 import cProfile
 import re
 from network import Network
+import pickle
 
 import pygame
 import pygame.gfxdraw
@@ -327,9 +328,9 @@ playing = True
 aa_text = True
 
 def use_data(data):
-    pass
+    info = pickle.loads(data)
     # players = data.players
-    # agars = data.agars
+    Globals.agars = info.agars
     # ...
 
 n = Network()
@@ -343,6 +344,10 @@ while playing:
     Globals.cells.sort(key=lambda x: x.mass, reverse=False)
     
     window.fill(background_color)
+
+    sv_data = n.send("Lemme get info") 
+    use_data(sv_data)
+
 
 
     for p in Globals.players:
@@ -367,10 +372,10 @@ while playing:
     if len(Globals.brown_viruses) < brown_virus_count:
         Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
    
-    if len(Globals.agars) < max_agars:
-        if frames%int(len(Globals.agars)/25000*fps+1) == 0:
-            rand_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-            Globals.agars.add(Agar(random.randint(-border_width, border_width), random.randint(-border_height, border_height), agar_min_mass, rand_color))
+    # if len(Globals.agars) < max_agars:
+    #     if frames%int(len(Globals.agars)/25000*fps+1) == 0:
+    #         rand_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+    #         Globals.agars.add(Agar(random.randint(-border_width, border_width), random.randint(-border_height, border_height), agar_min_mass, rand_color))
 
     target_scale = 0
     for thing in player.cells:

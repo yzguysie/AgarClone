@@ -10,22 +10,22 @@ import sys
 from configparser import ConfigParser
 import cProfile
 import re
-import pygame
-import pygame.gfxdraw
-import math
-import random
-import time
-from configparser import ConfigParser
+import copy
+import pickle
+
+
+
 from common.player import Player
 from common.cell import Cell
 from common.agar import Agar
 from common.camera import Camera
-from common.drawable import Drawable
+#from common.drawable import Drawable
 from common.globals import Globals
 from common.virus import Virus
 from common.brownvirus import BrownVirus
-import cProfile
-import re
+
+from common.serverinfo import Info
+
 
 """
 Todo:
@@ -116,6 +116,7 @@ def game_tick():
     global agar_time
     global virus_time
     global ejected_time
+    global info
 
     target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
     target_camera_x = target_camera_x/Globals.camera.scale-width/2
@@ -153,6 +154,20 @@ def game_tick():
         player_.tick()
 
     cell_time += time.time()-timer_start
+
+
+    info.agars = copy.deepcopy(Globals.agars)
+    # info.players = copy.deepcopy(Globals.players)
+    # info.cells = copy.deepcopy(Globals.agars)
+    # info.agars = copy.deepcopy(Globals.agars)
+    
+
+
+
+
+
+
+
 
 
 
@@ -328,6 +343,11 @@ tick_time = 0
 playing = True
 aa_text = True
 
+
+
+
+info = Info()
+
 server = "192.168.0.180"
 port = 5555
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -345,12 +365,12 @@ print("Waiting for a connection, Server Started")
 
 def threaded_client(conn, player):
     
-    conn.send(str.encode("Connected"))
+    conn.send(pickle.dumps(info.agars))
 
     reply = ""
     while True:
         try:
-            data = conn.recv(2048)
+            data = conn.recv(4096*8)
             reply = data.decode("utf-8")
 
             if not data:
@@ -358,9 +378,9 @@ def threaded_client(conn, player):
                 break
             else:
                 print("Recieved: ", reply)
-                print("Sending: ", reply)
+                print("Sending info")
             
-            conn.sendall(str.encode(reply))
+            conn.send(pickle.dumps(info.agars))
         except:
             break
     print("Lost conection")
