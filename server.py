@@ -368,17 +368,15 @@ def threaded_client(conn, player):
     conn.send(pickle.dumps(info))
     print(info)
 
-    reply = ""
     while True:
         try:
-            data = conn.recv(4096*8)
-            reply = data.decode("utf-8")
+            data = conn.recv(4096*1024)
 
             if not data:
                 print("Disconnected")
                 break
             else:
-                print("Recieved: ", reply)
+                print("Recieved: ", data)
                 print("Sending info")
             
             conn.send(pickle.dumps(info))

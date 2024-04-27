@@ -334,7 +334,7 @@ def use_data(data):
     # ...
 
 n = Network()
-sv_data = n.send("Lemme get info") 
+sv_data = n.send(player) 
 info = pickle.loads(sv_data)
 # players = data.players
 Globals.agars = info.agars
@@ -347,7 +347,7 @@ while playing:
     
     window.fill(background_color)
 
-    sv_data = n.send("Lemme get info") 
+    sv_data = n.send(player) 
     info = pickle.loads(sv_data)
     # players = data.players
     Globals.agars = info.agars
