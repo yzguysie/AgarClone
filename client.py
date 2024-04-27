@@ -23,6 +23,7 @@ from common.drawable import Drawable
 from common.globals import Globals
 from common.virus import Virus
 from common.brownvirus import BrownVirus
+from common.serverinfo import Info
 import cProfile
 import re
 
