@@ -330,7 +330,6 @@ def update(changes) -> None:
             Globals.viruses.append(obj)
         elif type(obj) == BrownVirus:
             Globals.brown_viruses.append(obj)
-    print(changes.objects_deleted)
     Globals.agars = set([agar for agar in Globals.agars if agar.id not in changes.objects_deleted])
     Globals.viruses = [virus for virus in Globals.viruses if virus.id not in changes.objects_deleted]
     Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in changes.objects_deleted]
