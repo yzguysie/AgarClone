@@ -210,7 +210,7 @@ def create_new_object(obj):
     
     if obj == "brown virus":
         new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
-        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
+        while len([c for c in Globals.cells if new_brown_virus.touching(c)]) != 0:
             new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
         Globals.brown_viruses.append(new_brown_virus)
         changes.objects_added.add(new_brown_virus)
@@ -349,7 +349,7 @@ def threaded_client(conn, player_id):
                 # print("Sending :", info)
 
             changes.cells = copy.deepcopy(Globals.cells)
-            changes.players = copy.deepcopy(Globals.cells)
+            changes.players = copy.deepcopy(Globals.players)
             changes.ejected = copy.deepcopy(Globals.ejected)
 
             
@@ -515,6 +515,10 @@ while playing:
         last_time = time.time()
     frames += 1
 
+    changes.objects_deleted = set()
+    for obj in Globals.all_drawable():
+        if obj.id in Globals.objects_to_delete:
+            changes.objects_deleted.add(obj)
 
     Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
     Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
@@ -531,7 +535,7 @@ while playing:
              Globals.cells.append(Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, Colors.red, Globals.players[i]))
     for p in Globals.players:
         p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
-
+    
     Globals.objects_to_delete = set()
 
 
