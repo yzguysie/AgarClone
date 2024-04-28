@@ -334,6 +334,7 @@ def update(changes):
         if type(obj) == Agar:
             if obj in Globals.agars:
                 Globals.agars.remove(obj)
+                print("removed agar")
             else:
                 print("Desync: agars")
         elif type(obj) == Virus:
@@ -347,6 +348,8 @@ def update(changes):
             else:
                 print("Desync: brown_viruses")
 
+        else:
+            print("What")
     Globals.players = changes.players
     Globals.cells = changes.cells
     Globals.ejected = changes.ejected
@@ -363,9 +366,9 @@ def use_data(data):
     # ...
 
 n = Network()
-info = n.getId()
-use_data(info)
-player_id = info.player.id
+info_ = n.getId()
+use_data(info_)
+player_id = info_.player.id
 
 fps = 30
 while playing:
@@ -377,8 +380,8 @@ while playing:
     window.fill(background_color)
 
 
-
-    use_data(n.send(info))
+    changes = n.send(info)
+    update(changes)
     info.split = False
     info.eject = False
 
