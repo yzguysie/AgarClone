@@ -322,7 +322,7 @@ aa_text = True
 
 info = ClientInfo()
 
-def update(changes):
+def update(changes) -> None:
     for obj in changes.objects_added:
         if type(obj) == Agar:
             Globals.agars.add(obj)
@@ -330,26 +330,12 @@ def update(changes):
             Globals.viruses.append(obj)
         elif type(obj) == BrownVirus:
             Globals.brown_viruses.append(obj)
-    for obj in changes.objects_deleted:
-        if type(obj) == Agar:
-            if obj in Globals.agars:
-                Globals.agars.remove(obj)
-                print("removed agar")
-            else:
-                print("Desync: agars")
-        elif type(obj) == Virus:
-            if obj in Globals.viruses:
-                Globals.viruses.remove(obj)
-            else:
-                print("Desync: viruses")
-        elif type(obj) == BrownVirus:
-            if obj in Globals.brown_viruses:
-                Globals.brown_viruses.remove(obj)
-            else:
-                print("Desync: brown_viruses")
+    print(changes.objects_deleted)
+    Globals.agars = set([agar for agar in Globals.agars if agar.id not in changes.objects_deleted])
+    Globals.viruses = [virus for virus in Globals.viruses if virus.id not in changes.objects_deleted]
+    Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in changes.objects_deleted]
 
-        else:
-            print("What")
+
     Globals.players = changes.players
     Globals.cells = changes.cells
     Globals.ejected = changes.ejected
