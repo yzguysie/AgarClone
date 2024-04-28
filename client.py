@@ -103,21 +103,14 @@ def calc_center_of_mass(bodies):
             return (10, 10)
 
 def game_draw():
-    global draw_time
-    timer_start = time.time()
     all_objs = list(all_drawable())
     all_objs.sort(key=lambda x: x.radius)
     for obj in all_objs:
         obj.draw(window, Globals.camera)
-    draw_time += time.time()-timer_start
 
 
 def server_tick():
-    global draw_time
-    global cell_time
-    global agar_time
-    global virus_time
-    global ejected_time
+
     global info
 
     target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
@@ -128,20 +121,7 @@ def server_tick():
     Globals.camera.set_pos(target_camera_x, target_camera_y)
     Globals.camera.tick()
 
-    timer_start = time.time()
 
-    #Bot AI (I think idk I wrote this like 2 yrs ago)
-    # for bot in players:
-    #     if bot != players[player]: #Make sure not to control player, only bots
-    #         for cell in bot:
-    #             target_cell = cell.target
-    #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
-                
-    #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
-    #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
-    #                         for bruh in bot:
-    #                                 bruh.split()
-    #                         break
 
     
     all_objs = list(all_drawable())
@@ -149,25 +129,16 @@ def server_tick():
         if type(thing) != Cell:
             thing.tick()
 
-    timer_start = time.time()
 
     player.update_target(Globals.camera, Globals.agars)
     for player_ in Globals.players:
         #player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
 
-    cell_time += time.time()-timer_start
 
 def game_tick():
     player.update_target(Globals.camera, Globals.agars)
     info.target = player.target
-
-
-    # global draw_time
-    # global cell_time
-    # global agar_time
-    # global virus_time
-    # global ejected_time
 
     try:
         target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
@@ -179,35 +150,6 @@ def game_tick():
         Globals.camera.tick()
     except:
         pass
-
-    # timer_start = time.time()
-
-    # #Bot AI (I think idk I wrote this like 2 yrs ago)
-    # # for bot in players:
-    # #     if bot != players[player]: #Make sure not to control player, only bots
-    # #         for cell in bot:
-    # #             target_cell = cell.target
-    # #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
-                
-    # #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
-    # #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
-    # #                         for bruh in bot:
-    # #                                 bruh.split()
-    # #                         break
-
-    
-    # all_objs = list(all_drawable())
-    # for thing in all_objs:
-    #     if type(thing) != Cell:
-    #         thing.tick()
-
-    # timer_start = time.time()
-
-    # for player_ in Globals.players:
-    #     player_.update_target(Globals.camera, Globals.agars)
-    #     player_.tick()
-
-    # cell_time += time.time()-timer_start
 
 
 
@@ -372,14 +314,7 @@ for i in range(int(brown_virus_count)):
     Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
 
 
-draw_time = 0
-cell_time = 0
-agar_time = 0
-virus_time = 0
-ejected_time = 0
-computational_time = 0
-total_time = time.time()
-tick_time = 0
+
 playing = True
 aa_text = True
 
@@ -506,9 +441,7 @@ while playing:
         info.split = True
                 
 
-    start_tick_time = time.time()
     game_tick()
-    tick_time += time.time()-start_tick_time
     game_draw()
 
 
@@ -531,10 +464,8 @@ while playing:
     dialogue_rect = dialogue.get_rect(center=(100, 200))
     window.blit(dialogue, dialogue_rect)
 
-    start_time = time.time()
     pygame.display.flip()
-    flipping_time = time.time()-start_time
-    computational_time += time.time()-start
+
 
    
     clock.tick(fps)
@@ -566,16 +497,6 @@ while playing:
 
 pygame.quit()
 
-print("Draw time: " + str(draw_time))
-print("Cell time: " + str(cell_time))
-print("Ejected time: " + str(ejected_time))
-print("Virus time: " + str(virus_time))
-print("Agar time: " + str(agar_time))
-print("Total time: " + str(time.time()-total_time))
-print("Computational time: " + str(computational_time))
-print("Flipping time: " + str(flipping_time))
-
-print("Tick time: " + str(tick_time))
 
 
 
