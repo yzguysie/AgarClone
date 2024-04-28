@@ -548,6 +548,7 @@ while playing:
     clock.tick(fps)
     if frames % int(fps/2) == 0:
         fps_ = round(1/(time.time()-start))
+        Globals.gamespeed = min(1/fps_, 1/fps*Globals.smooth_fix_limit)
         last_time = time.time()
     frames += 1
 
