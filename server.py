@@ -321,6 +321,7 @@ print("Waiting for a connection, Server Started")
 
 
 def threaded_client(conn, player_id):
+    global changes
     
     new_player = Player("player", get_random_color())
     Globals.players.append(new_player)
@@ -352,7 +353,7 @@ def threaded_client(conn, player_id):
             changes.players = copy.deepcopy(Globals.players)
             changes.ejected = copy.deepcopy(Globals.ejected)
 
-            
+            print(changes.objects_deleted)
             conn.send(pickle.dumps(changes))
         except:
             break
@@ -379,7 +380,6 @@ start_new_thread(handle_connections, (1, 2))
 
 while playing:
     changes.objects_added = set()
-    changes.objects_deleted = set()
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')
 
@@ -515,10 +515,7 @@ while playing:
         last_time = time.time()
     frames += 1
 
-    changes.objects_deleted = set()
-    for obj in Globals.all_drawable():
-        if obj.id in Globals.objects_to_delete:
-            changes.objects_deleted.add(obj)
+    changes.objects_deleted = Globals.objects_to_delete
 
     Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
     Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
