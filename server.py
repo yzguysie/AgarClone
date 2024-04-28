@@ -25,6 +25,8 @@ from common.virus import Virus
 from common.brownvirus import BrownVirus
 
 from common.serverinfo import ServerInfo
+from common.serverchanges import ServerChanges
+
 from common.clientinfo import ClientInfo
 
 
@@ -86,10 +88,10 @@ def mouse_in_game_pos():
     x,y = pygame.mouse.get_pos()
     return((x+Globals.camera.x)*Globals.camera.scale, (y+Globals.camera.y)*Globals.camera.scale)
 
-def new_cell(player):
-    new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, player.color, player)
-    Globals.cells.append(new_cell)
-    return new_cell
+# def new_cell(player):
+#     new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, player.color, player)
+#     Globals.cells.append(new_cell)
+#     return new_cell
 
 def calc_center_of_mass(bodies):
         try:
@@ -193,10 +195,31 @@ def all_consumable():
     for cell in Globals.cells:
          yield cell
 
+def create_new_object(obj):
+    if obj == "agar":
+        new_agar = Agar(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.agar_min_mass, get_random_color())
+        Globals.agars.add(new_agar)
+        changes.objects_added.add(new_agar)
 
+    if obj == "virus":
+        new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
+        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
+            new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
+        Globals.viruses.append(new_virus)
+        changes.objects_added.add(new_virus)
+    
+    if obj == "brown virus":
+        new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
+        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
+            new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
+        Globals.brown_viruses.append(new_brown_virus)
+        changes.objects_added.add(new_brown_virus)
 
 
 pygame.init()
+
+info = ServerInfo()
+changes = ServerChanges()
 
 config = ConfigParser()
 
@@ -263,14 +286,13 @@ player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", 
 last_time = time.time()
 
 for i in range(int(Globals.max_agars/2)):
-    Globals.agars.add(Agar(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.agar_min_mass, get_random_color()))
+    create_new_object("agar")
 
 for i in range(int(Globals.virus_count)):
-    Globals.viruses.append(Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green))
+    create_new_object("virus")
 
 for i in range(int(Globals.brown_virus_count)):
-    Globals.brown_viruses.append(BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown))
-
+    create_new_object("brown virus")
 
 playing = True
 aa_text = True
@@ -278,9 +300,9 @@ aa_text = True
 
 
 
-info = ServerInfo()
 
-server = "192.168.0.180"
+
+server = "192.168.0.132"
 server_ip = socket.gethostbyname(server)
 print(server_ip)
 port = 5555
@@ -302,7 +324,8 @@ def threaded_client(conn, player_id):
     
     new_player = Player("player", get_random_color())
     Globals.players.append(new_player)
-    conn.send(pickle.dumps(new_player))
+    info.player = new_player
+    conn.send(pickle.dumps(info))
 
     while True:
         try:
@@ -324,12 +347,18 @@ def threaded_client(conn, player_id):
                         
                 # print("Recieved: ", cl_data)
                 # print("Sending :", info)
+
+            changes.cells = copy.deepcopy(Globals.cells)
+            changes.players = copy.deepcopy(Globals.cells)
+            changes.ejected = copy.deepcopy(Globals.ejected)
+
             
-            conn.send(pickle.dumps(info))
+            conn.send(pickle.dumps(changes))
         except:
             break
     print("Lost conection")
     conn.close()
+    Globals.players.remove(new_player)
     return
 
 
@@ -345,7 +374,12 @@ def handle_connections(useless1, useless2):
 #handle_connections(1, 2)
 start_new_thread(handle_connections, (1, 2))
 
+
+
+
 while playing:
+    changes.objects_added = set()
+    changes.objects_deleted = set()
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')
 
@@ -368,17 +402,14 @@ while playing:
 
 
     if len(Globals.viruses) < Globals.virus_count:
-        new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
-        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
-            new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
-        Globals.viruses.append(new_virus)
+        create_new_object("virus")
 
     if len(Globals.brown_viruses) < Globals.brown_virus_count:
-        Globals.brown_viruses.append(BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown))
+        create_new_object("brown virus")
    
     if len(Globals.agars) < Globals.max_agars:
         if frames%int(len(Globals.agars)/25000*Globals.fps+1) == 0:
-            Globals.agars.add(Agar(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.agar_min_mass, get_random_color()))
+            create_new_object("agar")
 
     target_scale = 0
     for thing in player.cells:

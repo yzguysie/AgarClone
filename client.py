@@ -322,7 +322,34 @@ aa_text = True
 
 info = ClientInfo()
 
+def update(changes):
+    for obj in changes.objects_added:
+        if type(obj) == Agar:
+            Globals.agars.add(obj)
+        elif type(obj) == Virus:
+            Globals.viruses.append(obj)
+        elif type(obj) == BrownVirus:
+            Globals.brown_viruses.append(obj)
+    for obj in changes.objects_deleted:
+        if type(obj) == Agar:
+            if obj in Globals.agars:
+                Globals.agars.remove(obj)
+            else:
+                print("Desync: agars")
+        elif type(obj) == Virus:
+            if obj in Globals.viruses:
+                Globals.viruses.remove(obj)
+            else:
+                print("Desync: viruses")
+        elif type(obj) == BrownVirus:
+            if obj in Globals.brown_viruses:
+                Globals.brown_viruses.remove(obj)
+            else:
+                print("Desync: brown_viruses")
 
+    Globals.players = changes.players
+    Globals.cells = changes.cells
+    Globals.ejected = changes.ejected
 
 def use_data(data):
     # players = data.players
@@ -336,10 +363,10 @@ def use_data(data):
     # ...
 
 n = Network()
-player_id = n.getId().id
-#info = pickle.loads(sv_data)
-# players = data.players
-#Globals.agars = sv_data.agars
+info = n.getId()
+use_data(info)
+player_id = info.player.id
+
 fps = 30
 while playing:
     start = time.time()
