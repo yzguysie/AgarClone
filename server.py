@@ -50,9 +50,12 @@ class Colors:
     light_green = (64, 255, 64)
     dark_green = (0, 128, 0)    
 
-    yellow = (255, 255, 0)
-    purple = (255, 0, 255)
+    yellow = (196, 196, 0)
+    orange = (255, 127, 0)
+    purple = (127, 0, 255)
+    pink = (255, 16, 196)
     turquoise = (0, 255, 255)
+    good_color = (32, 255, 168)
     cyan = turquoise
 
     brown = (139,69,19)
@@ -83,8 +86,8 @@ def mouse_in_game_pos():
     x,y = pygame.mouse.get_pos()
     return((x+Globals.camera.x)*Globals.camera.scale, (y+Globals.camera.y)*Globals.camera.scale)
 
-def new_cell(player, color):
-    new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, color, player)
+def new_cell(player):
+    new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, player.color, player)
     Globals.cells.append(new_cell)
     return new_cell
 
@@ -103,20 +106,12 @@ def calc_center_of_mass(bodies):
             return (10, 10)
 
 def game_draw():
-    global draw_time
-    timer_start = time.time()
     all_objs = list(all_drawable())
     all_objs.sort(key=lambda x: x.radius)
     for obj in all_objs:
         obj.draw(window, Globals.camera)
-    draw_time += time.time()-timer_start
 
 def game_tick():
-    global draw_time
-    global cell_time
-    global agar_time
-    global virus_time
-    global ejected_time
     global info
 
     target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
@@ -127,7 +122,6 @@ def game_tick():
     Globals.camera.set_pos(target_camera_x, target_camera_y)
     Globals.camera.tick()
 
-    timer_start = time.time()
 
     #Bot AI (I think idk I wrote this like 2 yrs ago)
     # for bot in players:
@@ -148,19 +142,17 @@ def game_tick():
         if type(thing) != Cell:
             thing.tick()
 
-    timer_start = time.time()
+
 
     player.update_target(Globals.camera, Globals.agars)
     for player_ in Globals.players:
         #player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
 
-    cell_time += time.time()-timer_start
 
-
-    info.agars = copy.deepcopy(Globals.agars)
-    info.cells = copy.deepcopy(Globals.cells)
     info.players = copy.deepcopy(Globals.players)
+    info.cells = copy.deepcopy(Globals.cells)
+    info.agars = copy.deepcopy(Globals.agars)    
     info.viruses = copy.deepcopy(Globals.viruses)
     info.brown_viruses = copy.deepcopy(Globals.brown_viruses)
     info.ejected = copy.deepcopy(Globals.ejected)
@@ -211,59 +203,9 @@ config = ConfigParser()
 # parse existing file
 config.read('common/agar.ini')
 
-# read values from a section
-fps = config.getint('settings', 'fps')
-speed = config.getfloat('settings', 'speed')
-
-gamemode = config.getint('settings', 'gamemode')
-border_width = config.getint('settings', 'border_width')
-border_height = config.getint('settings', 'border_height')
-
-
-max_agars = config.getint('settings', 'max_agars')
-agar_min_mass = config.getint('settings', 'agar_min_mass')
-agar_max_mass = config.getint('settings', 'agar_max_mass')
-agar_grow = config.getboolean('settings', 'agar_grow')
-agar_grow_speed = config.getfloat('settings', 'agar_grow_speed')
-
-
-
-virus_count = config.getint('settings', 'virus_count')
-virus_mass = config.getint('settings', 'virus_mass')
-
-brown_virus_count = config.getint('settings', 'brown_virus_count')
-brown_virus_mass = config.getint('settings', 'brown_virus_mass')
-
-
-player_start_mass = config.getint('settings', 'player_start_mass')
-player_speed = config.getfloat('settings', 'player_speed')
-player_min_mass = config.getint('settings', 'player_min_mass')
-player_max_cells = config.getint('settings', 'player_max_cells')
-player_max_cell_mass = config.getint('settings', 'player_max_cell_mass')
-player_decay_rate = config.getfloat('settings', 'player_decay_rate')
-player_recombine_time = config.getfloat('settings', 'player_recombine_time')
-player_eject_min_mass = config.getint('settings', 'player_eject_min_mass')
-player_split_min_mass = config.getint('settings', 'player_split_min_mass')
-
-#agar_min_mass = 1
-#agar_max_mass = 4
-#max_agars = 3000
-
-ejected_size = config.getint('settings', 'ejected_size')
-ejected_loss = config.getint('settings', 'ejected_loss')
-ejected_speed = config.getint('settings', 'ejected_speed')
-
-bot_count = config.getint('settings', 'bot_count')
-bot_start_mass = config.getint('settings', 'bot_start_mass')
-
-minion_count = config.getint('settings', 'minion_count')
-minion_start_mass = config.getint('settings', 'minion_start_mass')
-
-
 
 width, height = 1280, 720
 
-#virus_image = pygame.image.load("resources/images/virus.png")
 
 aa_agar = True
 
@@ -292,9 +234,14 @@ Globals.font_width = int(width/100+1)
 Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 objects = []
 
-pygame.display.set_caption("Agar.io Clone")
+pygame.display.set_caption("Agar.io Clone Server")
 
 smoothness = 15
+
+
+def get_random_color():
+    colors = [Colors.red, Colors.dark_red, Colors.pink, Colors.orange, Colors.yellow, Colors.dark_green, Colors.green, Colors.purple, Colors.blue, Colors.light_blue, Colors.cyan, Colors.good_color, ]
+    return colors[random.randint(0, len(colors)-1)]
 
 
 smooth_fix_limit = 4
@@ -302,7 +249,7 @@ smooth_fix_limit = 4
 window = pygame.display.set_mode([width, height])
 clock = pygame.time.Clock()
 
-player = Player("player", Colors.blue)
+player = Player("player", get_random_color())
 Globals.players.append(player)
 # for i in range(bot_count):
 #     Globals.players.append(Player("bot", Colors.red))
@@ -311,29 +258,20 @@ Globals.players.append(player)
 
 player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
 
-fps_ = fps
+#fps_ = fps
 
 last_time = time.time()
 
-for i in range(int(max_agars/2)):
-    rand_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-    Globals.agars.add(Agar(random.randint(-border_width, border_width), random.randint(-border_height, border_height), agar_min_mass, rand_color))
+for i in range(int(Globals.max_agars/2)):
+    Globals.agars.add(Agar(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.agar_min_mass, get_random_color()))
 
-for i in range(int(virus_count)):
-    Globals.viruses.append(Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green))
+for i in range(int(Globals.virus_count)):
+    Globals.viruses.append(Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green))
 
-for i in range(int(brown_virus_count)):
-    Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
+for i in range(int(Globals.brown_virus_count)):
+    Globals.brown_viruses.append(BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown))
 
 
-draw_time = 0
-cell_time = 0
-agar_time = 0
-virus_time = 0
-ejected_time = 0
-computational_time = 0
-total_time = time.time()
-tick_time = 0
 playing = True
 aa_text = True
 
@@ -359,9 +297,10 @@ s.listen()
 print("Waiting for a connection, Server Started")
 
 
+
 def threaded_client(conn, player_id):
     
-    new_player = Player("player", Colors.yellow)
+    new_player = Player("player", get_random_color())
     Globals.players.append(new_player)
     conn.send(pickle.dumps(new_player))
 
@@ -403,7 +342,7 @@ def handle_connections(useless1, useless2):
         start_new_thread(threaded_client, (conn, currentPlayer))
         currentPlayer += 1
 
-#handle_connections()
+#handle_connections(1, 2)
 start_new_thread(handle_connections, (1, 2))
 
 while playing:
@@ -418,29 +357,28 @@ while playing:
     for p in Globals.players:
         if len(p.cells) == 0:
             if p.mode == "player":
-                new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.light_blue, p)
+                new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
             elif p.mode == "minion":
-                new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), minion_start_mass, Colors.green, p)
+                new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.minion_start_mass, p.color, p)
             else:
-                new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), bot_start_mass, Colors.red, p)
+                new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.bot_start_mass, p.color, p)
             Globals.cells.append(new_cell)
             p.cells.append(new_cell)
              
 
 
-    if len(Globals.viruses) < virus_count:
-        new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
+    if len(Globals.viruses) < Globals.virus_count:
+        new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
         while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
-            new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
+            new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
         Globals.viruses.append(new_virus)
 
-    if len(Globals.brown_viruses) < brown_virus_count:
-        Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
+    if len(Globals.brown_viruses) < Globals.brown_virus_count:
+        Globals.brown_viruses.append(BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown))
    
-    if len(Globals.agars) < max_agars:
-        if frames%int(len(Globals.agars)/25000*fps+1) == 0:
-            rand_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-            Globals.agars.add(Agar(random.randint(-border_width, border_width), random.randint(-border_height, border_height), agar_min_mass, rand_color))
+    if len(Globals.agars) < Globals.max_agars:
+        if frames%int(len(Globals.agars)/25000*Globals.fps+1) == 0:
+            Globals.agars.add(Agar(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.agar_min_mass, get_random_color()))
 
     target_scale = 0
     for thing in player.cells:
@@ -508,24 +446,21 @@ while playing:
                 window = pygame.display.set_mode([width, height])
     if pygame.key.get_pressed()[pygame.K_e]:
         for thing in player.cells:
-            if thing.mass > player_eject_min_mass and thing.mass > ejected_loss:
+            if thing.mass > Globals.player_eject_min_mass and thing.mass > Globals.ejected_loss:
                 thing.eject_mass()
     if pygame.key.get_pressed()[pygame.K_z]:
         player.split()
                 
 
-    start_tick_time = time.time()
     game_tick()
-    tick_time += time.time()-start_tick_time
     game_draw()
 
 
     dialogue = Globals.dialogue_font.render("Mass: " + str(int(total_mass+.5)), aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    dialogue = Globals.dialogue_font.render("FPS: " + str(fps_), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render("FPS: " + str(Globals.fps_), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 100))
     window.blit(dialogue, dialogue_rect)
-   
     dialogue = Globals.dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 125))
     window.blit(dialogue, dialogue_rect)
@@ -539,16 +474,13 @@ while playing:
     dialogue_rect = dialogue.get_rect(center=(100, 200))
     window.blit(dialogue, dialogue_rect)
 
-    start_time = time.time()
     pygame.display.flip()
-    flipping_time = time.time()-start_time
-    computational_time += time.time()-start
 
    
-    clock.tick(fps)
-    if frames % int(fps/2) == 0:
-        fps_ = round(1/(time.time()-start))
-        Globals.gamespeed = min(1/fps_, 1/fps*Globals.smooth_fix_limit)
+    clock.tick(Globals.fps)
+    if frames % int(Globals.fps/2) == 0:
+        Globals.fps_ = round(1/(time.time()-start))
+        Globals.gamespeed = min(1/Globals.fps_, 1/Globals.fps*Globals.smooth_fix_limit)
         last_time = time.time()
     frames += 1
 
@@ -560,29 +492,16 @@ while playing:
     Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
     objects = [obj for obj in objects if obj.id not in Globals.objects_to_delete]
     for cell in Globals.cells:
-        if cell.mass > player_max_cell_mass:
+        if cell.mass > Globals.player_max_cell_mass:
             cell.split()
     for i in range(len(Globals.players)):
         thing = player.cells
         if len(thing) < 1:
-             Globals.cells.append(Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.red, Globals.players[i]))
+             Globals.cells.append(Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, Colors.red, Globals.players[i]))
     for p in Globals.players:
         p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
 
     Globals.objects_to_delete = set()
 
-   
 
 pygame.quit()
-
-print("Draw time: " + str(draw_time))
-print("Cell time: " + str(cell_time))
-print("Ejected time: " + str(ejected_time))
-print("Virus time: " + str(virus_time))
-print("Agar time: " + str(agar_time))
-print("Total time: " + str(time.time()-total_time))
-print("Computational time: " + str(computational_time))
-print("Flipping time: " + str(flipping_time))
-
-print("Tick time: " + str(tick_time))
-
