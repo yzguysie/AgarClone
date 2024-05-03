@@ -14,11 +14,11 @@ class Ejected(Drawable):
         xdiff = x-cell.x
         ydiff = y-cell.y
         angle = math.atan2(ydiff, xdiff)+random.uniform(-.1, .1)
-        vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
-        self.x = self.x+(cell.radius)*vector[0]
-        self.y = self.y+(cell.radius)*vector[1]
-        self.xspeed = vector[0]*Globals.ejected_speed*60
-        self.yspeed = vector[1]*Globals.ejected_speed*60
+        self.vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
+        self.x = self.x+(cell.radius)*self.vector[0]
+        self.y = self.y+(cell.radius)*self.vector[1]
+        self.xspeed = self.vector[0]*Globals.ejected_speed*60
+        self.yspeed = self.vector[1]*Globals.ejected_speed*60
         self.time_created = time.time()
 
     def tick(self):
@@ -58,17 +58,27 @@ class Ejected(Drawable):
         for other in Globals.ejected:
             if other.id != self.id:
                 if self.touching(other):
-                    try:
+                    # try:
+                    #     xdiff = self.x-other.x
+                    #     ydiff = self.y-other.y
+                    #     distance_squared = xdiff**2+ydiff**2
+                    #     xforce = xdiff/distance_squared*50
+                    #     yforce = ydiff/distance_squared*50
+                    #     self.x += xforce/Globals.fps
+                    #     self.y += yforce/Globals.fps
+                    #     other.x -= xforce/Globals.fps
+                    #     other.y -= yforce/Globals.fps
+                    # except Exception as e: print(e + " At ejected collision")
+                    if self.touching(other):
                         xdiff = self.x-other.x
                         ydiff = self.y-other.y
-                        distance_squared = xdiff**2+ydiff**2
-                        xforce = xdiff/distance_squared*50
-                        yforce = ydiff/distance_squared*50
-                        self.x += xforce/Globals.fps
-                        self.y += yforce/Globals.fps
-                        other.x -= xforce/Globals.fps
-                        other.y -= yforce/Globals.fps
-                    except Exception as e: print(e + " At ejected collision")
+                        angle = math.atan2(ydiff, xdiff)
+                        vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
+                        velocity = ((self.radius+other.radius)-self.distance_to(other))*Globals.gamespeed # So they wont repel too much (looks kind of like soft-body)
+                        self.x += vector[0]*velocity/2
+                        self.y += vector[1]*velocity/2
+                        other.x -= vector[0]*velocity/2
+                        other.y -= vector[1]*velocity/2
         
         # Consume other ejected
 

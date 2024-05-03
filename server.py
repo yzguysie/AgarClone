@@ -84,28 +84,8 @@ class Sprite:
 
 
 
-def mouse_in_game_pos():
-    x,y = pygame.mouse.get_pos()
-    return((x+Globals.camera.x)*Globals.camera.scale, (y+Globals.camera.y)*Globals.camera.scale)
 
-# def new_cell(player):
-#     new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, player.color, player)
-#     Globals.cells.append(new_cell)
-#     return new_cell
 
-def calc_center_of_mass(bodies):
-        try:
-            center_x = 0
-            center_y = 0
-            weight = 0
-            for body_ in bodies:
-                center_x += body_.x*body_.mass
-                center_y += body_.y*body_.mass
-                weight += body_.mass
-            return (center_x/weight, center_y/weight)
-        except:
-            print("divide by 0")
-            return (10, 10)
 
 def game_draw():
     all_objs = list(all_drawable())
@@ -116,7 +96,7 @@ def game_draw():
 def game_tick():
     global info
 
-    target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
+    target_camera_x, target_camera_y = player.calc_center_of_mass()
     target_camera_x = target_camera_x/Globals.camera.scale-width/2
     target_camera_y = target_camera_y/Globals.camera.scale-height/2
     #camera.x += (target_camera_x-camera.x)/1
@@ -146,9 +126,10 @@ def game_tick():
 
 
 
-    player.update_target(Globals.camera, Globals.agars)
+    player.update_target(Globals.camera, Globals.agars) # Server player has to update, clients do elsewhere
     for player_ in Globals.players:
-        #player_.update_target(Globals.camera, Globals.agars)
+        if player_.mode != "player":
+            player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
 
 
@@ -274,10 +255,10 @@ clock = pygame.time.Clock()
 
 player = Player("player", get_random_color())
 Globals.players.append(player)
-# for i in range(bot_count):
-#     Globals.players.append(Player("bot", Colors.red))
-# for i in range(minion_count):
-#     Globals.players.append(Player("minion", Colors.green))
+for i in range(Globals.bot_count):
+    Globals.players.append(Player("bot", Colors.red))
+for i in range(Globals.minion_count):
+    Globals.players.append(Player("minion", Colors.green))
 
 player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
 
@@ -302,7 +283,7 @@ aa_text = True
 
 
 
-server = "192.168.0.132"
+server = ""
 server_ip = socket.gethostbyname(server)
 print(server_ip)
 port = 5555
@@ -391,6 +372,7 @@ while playing:
     for p in Globals.players:
         if len(p.cells) == 0:
             if p.mode == "player":
+                #FIXME - make cells never spawn on viruses or in other cells
                 new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
             elif p.mode == "minion":
                 new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.minion_start_mass, p.color, p)

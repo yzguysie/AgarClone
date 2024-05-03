@@ -25,7 +25,7 @@ class Drawable:
              
         self.radius = math.sqrt(self.mass)
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
-        self.smoothradius += (self.radius - self.smoothradius)/15
+        self.smoothradius += (self.radius - self.smoothradius)/(Globals.fps_/2)
 
         #Draw Outline
         if self.outline_thickness > 0 and outline:

@@ -173,40 +173,42 @@ class Cell(Drawable):
     def check_colliding(self, cells):
 
        
-        for thing in self.player.cells:
+        for other in self.player.cells:
            
-            if thing.id != self.id:
-                sq_distance = ((thing.x-self.x)**2+(thing.y-self.y)**2)
-                if sq_distance < (thing.radius+self.radius)**2:
+            if other.id != self.id:
+                sq_distance = ((other.x-self.x)**2+(other.y-self.y)**2)
+                if sq_distance < (other.radius+self.radius)**2:
                     # If cells are too young, repel each other
-                    if (time.time()-thing.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4) or time.time()-self.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4)) and thing.player == self.player:
-                        if time.time()-thing.time_created > .2 and time.time()-self.time_created > .2:
-                            for i in range(10):
-                                if self.touching(thing):
-                                    try:
-                                        xdiff = self.x-thing.x
-                                        ydiff = self.y-thing.y
-                                        distance_squared = xdiff**2+ydiff**2
-                                        xforce = xdiff/distance_squared*250
-                                        yforce = ydiff/distance_squared*250
-                                        self.x += xforce*Globals.gamespeed
-                                        self.y += yforce*Globals.gamespeed
-                                        thing.x -= xforce*Globals.gamespeed
-                                        thing.y -= yforce*Globals.gamespeed
-                                    except Exception as e: print(str(e) + " At cell collision")
+                    if (time.time()-other.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4) or time.time()-self.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4)) and other.player == self.player:
+                        if time.time()-other.time_created > .2 and time.time()-self.time_created > .2:
+                            if self.touching(other):
+                                max_dist = self.radius + other.radius
+                                move_speed = 50
+                                xdiff = self.x-other.x
+                                ydiff = self.y-other.y
+                                angle = math.atan2(ydiff, xdiff)
+                                vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
+                                velocity = min(((max_dist)-self.distance_to(other)), move_speed*Globals.gamespeed) # cells will never become too far apart, and not too quickly
+                                self.x += vector[0]*velocity/2
+                                self.y += vector[1]*velocity/2
+                                other.x -= vector[0]*velocity/2
+                                other.y -= vector[1]*velocity/2
+
+
+                                
 
                     # If cells are old enough, recombine
                     else:
-                        if sq_distance < (self.radius-thing.radius/3)**2:
-                            if self.id not in Globals.objects_to_delete and thing.id not in Globals.objects_to_delete:
-                                self.consume(thing)
+                        if sq_distance < (self.radius-other.radius/3)**2:
+                            if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
+                                self.consume(other)
 
-        for thing in cells:
-            if thing.player != self.player:
-                sq_distance = (thing.x-self.x)**2+(thing.y-self.y)**2
-                if sq_distance < (thing.radius+self.radius)**2:
-                    if self.id not in Globals.objects_to_delete and thing.id not in Globals.objects_to_delete:
-                        if self.mass >= thing.mass*1.3 and sq_distance < (self.radius-thing.radius/3)**2:
-                                self.consume(thing)
-                        elif thing.mass >= self.mass*1.3 and sq_distance < (thing.radius-self.radius/3)**2:
-                                thing.consume(self)
+        for other in cells:
+            if other.player != self.player:
+                sq_distance = (other.x-self.x)**2+(other.y-self.y)**2
+                if sq_distance < (other.radius+self.radius)**2:
+                    if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
+                        if self.mass >= other.mass*1.3 and sq_distance < (self.radius-other.radius/3)**2:
+                                self.consume(other)
+                        elif other.mass >= self.mass*1.3 and sq_distance < (other.radius-self.radius/3)**2:
+                                other.consume(self)
