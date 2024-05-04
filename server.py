@@ -329,7 +329,7 @@ def threaded_client(conn, player_id):
                         
                 # print("Recieved: ", cl_data)
                 # print("Sending :", info)
-                conn.send(changes)
+                conn.send(pickle.dumps(changes))
         except:
             break
 

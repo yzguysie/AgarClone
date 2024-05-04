@@ -348,7 +348,6 @@ def use_data(data):
     Globals.cells = data.cells
     Globals.players = data.players
 
-    # ...
 
 n = Network()
 info_ = n.getId()
@@ -379,21 +378,6 @@ while playing:
 
              
 
-
-    # if len(Globals.viruses) < virus_count:
-    #     new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
-    #     while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
-    #         new_virus = Virus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), virus_mass, Colors.green)
-    #     Globals.viruses.append(new_virus)
-
-    # if len(Globals.brown_viruses) < brown_virus_count:
-    #     Globals.brown_viruses.append(BrownVirus(random.randint(-border_width, border_width), random.randint(-border_height, border_height), brown_virus_mass, Colors.brown))
-   
-    # if len(Globals.agars) < max_agars:
-    #     if frames%int(len(Globals.agars)/25000*fps+1) == 0:
-    #         rand_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-    #         Globals.agars.add(Agar(random.randint(-border_width, border_width), random.randint(-border_height, border_height), agar_min_mass, rand_color))
-
     target_scale = 0
     for thing in player.cells:
         target_scale += thing.radius**(1/4)/10
@@ -404,19 +388,6 @@ while playing:
     Globals.camera.set_scale(max(target_scale, .1))
 
     total_mass = sum(cell.mass for cell in player.cells)
-
-    #Bot AI Target finding
-    # for thing in players:
-    #     if thing != player:
-    #         biggest = thing.cells[len(thing.cells)-1]
-
-    #         # for thing2 in cells:
-    #         #     if thing2.mass*1.3<biggest.mass and thing2.player != biggest.player:
-    #         #         for buggin in thing:
-    #         #             buggin.target = thing2
-    #         target = get_nearest_agar(biggest)
-    #         for cell in thing.cells:
-    #             cell.target = target
                 
 
                    
@@ -490,28 +461,4 @@ while playing:
     frames += 1
 
 
-    # Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
-    # Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
-    # Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
-    # Globals.viruses = [virus for virus in Globals.viruses if virus.id not in Globals.objects_to_delete]
-    # Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
-    # objects = [obj for obj in objects if obj.id not in Globals.objects_to_delete]
-    # for cell in Globals.cells:
-    #     if cell.mass > player_max_cell_mass:
-    #         cell.split()
-    # for i in range(len(Globals.players)):
-    #     thing = player.cells
-    #     if len(thing) < 1:
-    #          Globals.cells.append(Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.red, Globals.players[i]))
-    # for p in Globals.players:
-    #     p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
-
-    # Globals.objects_to_delete = set()
-
-   
-
 pygame.quit()
-
-
-
-
