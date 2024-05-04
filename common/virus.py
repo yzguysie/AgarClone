@@ -5,7 +5,7 @@ class Virus(Drawable):
 
     def __init__(self, x, y, mass, color):
         super().__init__(x, y, mass, color)
-        self.split_mass = 200
+        self.split_mass = Globals.virus_split_mass
 
     def tick(self):
         self.check_colliding(Globals.cells)
@@ -17,9 +17,8 @@ class Virus(Drawable):
 
     def check_colliding(self, cells):
         for cell in cells:
-            if self.id not in Globals.objects_to_delete:
-                if cell.mass >= Globals.virus_mass*1.3 and abs(self.x-cell.x)**2+abs(self.y-cell.y)**2 < (self.radius/4+cell.radius)**2:
-                    cell.consume_virus(self)
+            if cell.can_consume(self):
+                cell.consume_virus(self)
 
     def split(self, e):
         new_virus = Virus(self.x, self.y, Globals.virus_mass, self.color)

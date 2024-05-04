@@ -1,5 +1,6 @@
 import pygame
 from common.globals import Globals
+import math
 class Player:
     def __init__(self, mode, color):
         self.id = Globals.drawable_count
@@ -53,7 +54,7 @@ class Player:
             
         
         elif self.mode == "bot":
-            nearest_agar = self.get_nearest_agar(agars)
+            nearest_agar = self.get_nearest_obj(agars)
             target = nearest_agar.x, nearest_agar.y
 
 
@@ -65,13 +66,24 @@ class Player:
             cell.target = self.target
         return target
     
-    def get_nearest_agar(self, agars):
-        center = self.calc_center_of_mass()
+    def get_nearest_obj(self, digga):
+        center_x, center_y = self.calc_center_of_mass()
+        mindist = self.cells[0].radius*2
+        found = False
+        for obj in Globals.cells:
+            if obj.player != self:
+                if obj.mass*1.3 < self.cells[0].mass:
+                    dist = math.sqrt((center_x-obj.x)**2+(center_y-obj.y)**2)
+                    if dist < mindist:
+                        mindist = dist
+                        near = obj
+                        found = True
+        if found:
+            return near
         mindist = 2147483646
-        #minagar = Agar(0, 0, 1, Colors.green)
-        for agar in agars:
-            dist_sq = (center[0]-agar.x)**2+(center[1]-agar.y)**2
+        for obj in Globals.agars:
+            dist_sq = (center_x-obj.x)**2+(center_y-obj.y)**2
             if dist_sq < mindist:
                 mindist = dist_sq
-                minagar = agar
+                minagar = obj
         return minagar

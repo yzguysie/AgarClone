@@ -299,11 +299,11 @@ s.listen()
 
 print("Waiting for a connection, Server Started")
 
-
+connected = []
 
 def threaded_client(conn, player_id):
     global changes
-    
+    #connected.append(conn)
     new_player = Player("player", get_random_color())
     Globals.players.append(new_player)
     info.player = new_player
@@ -314,7 +314,7 @@ def threaded_client(conn, player_id):
             cl_data = pickle.loads(conn.recv(4096*1024))
 
             if not cl_data:
-                print("Disconnected")
+                print("Disconnected from ", conn)
                 break
             else:
                 for p in Globals.players:
@@ -329,16 +329,12 @@ def threaded_client(conn, player_id):
                         
                 # print("Recieved: ", cl_data)
                 # print("Sending :", info)
-
-            changes.cells = copy.deepcopy(Globals.cells)
-            changes.players = copy.deepcopy(Globals.players)
-            changes.ejected = copy.deepcopy(Globals.ejected)
-
-            print(changes.objects_deleted)
-            conn.send(pickle.dumps(changes))
+                conn.send(changes)
         except:
             break
-    print("Lost conection")
+
+    print("Lost conection to ", conn)
+    connected.remove(conn)
     conn.close()
     Globals.players.remove(new_player)
     return
@@ -373,7 +369,12 @@ while playing:
         if len(p.cells) == 0:
             if p.mode == "player":
                 #FIXME - make cells never spawn on viruses or in other cells
-                new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
+                if len(Globals.ejected) > 0:
+                    e = Globals.ejected[0]
+                    Globals.objects_to_delete.add(e)
+                    new_cell = Cell(e.x, e.y, Globals.player_start_mass, p.color, p)
+                else:
+                    new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
             elif p.mode == "minion":
                 new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.minion_start_mass, p.color, p)
             else:
@@ -498,6 +499,7 @@ while playing:
     frames += 1
 
     changes.objects_deleted = Globals.objects_to_delete
+    
 
     Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
     Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
@@ -514,6 +516,11 @@ while playing:
              Globals.cells.append(Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, Colors.red, Globals.players[i]))
     for p in Globals.players:
         p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
+
+    changes.cells = copy.deepcopy(Globals.cells)
+    changes.players = copy.deepcopy(Globals.players)
+    changes.ejected = copy.deepcopy(Globals.ejected)
+
     
     Globals.objects_to_delete = set()
 

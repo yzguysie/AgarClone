@@ -42,6 +42,7 @@ class Globals:
 
     virus_count = config.getint('settings', 'virus_count')
     virus_mass = config.getint('settings', 'virus_mass')
+    virus_split_mass = config.getint('settings', 'virus_split_mass')
 
     brown_virus_count = config.getint('settings', 'brown_virus_count')
     brown_virus_mass = config.getint('settings', 'brown_virus_mass')
