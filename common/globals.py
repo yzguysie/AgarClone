@@ -1,4 +1,3 @@
-from common.camera import Camera
 from configparser import ConfigParser
 import pygame
 pygame.font.init()
@@ -8,7 +7,7 @@ class Globals:
     dialogue_font = pygame.font.SysFont(font, font_width)
     drawable_count = 0
     objects_to_delete = set()
-    camera = Camera()
+    camera = None
     agars = set()
     cells = []
     ejected = []

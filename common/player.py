@@ -51,6 +51,7 @@ class Player:
         if self.mode == "player" or self.mode == "minion":
             x, y = pygame.mouse.get_pos()
             target = (x+camera.x)*camera.scale, (y+camera.y)*camera.scale
+            target = camera.get_x(x), camera.get_y(y)
             
         
         elif self.mode == "bot":

@@ -8,7 +8,7 @@ class Agar(Drawable):
         super().__init__(x, y, mass, color)
 
     def draw(self, window, camera):
-        super().draw(window, camera, False, False)
+        super().draw(window, camera, True, True)
 
 
     def tick(self):

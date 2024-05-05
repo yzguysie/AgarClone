@@ -95,14 +95,12 @@ def game_draw():
 
 def game_tick():
     global info
-
+    
     target_camera_x, target_camera_y = player.calc_center_of_mass()
-    target_camera_x = target_camera_x/Globals.camera.scale-width/2
-    target_camera_y = target_camera_y/Globals.camera.scale-height/2
-    #camera.x += (target_camera_x-camera.x)/1
-    #camera.y += (target_camera_y-camera.y)/1
     Globals.camera.set_pos(target_camera_x, target_camera_y)
     Globals.camera.tick()
+
+
 
 
     #Bot AI (I think idk I wrote this like 2 yrs ago)
@@ -184,15 +182,19 @@ def create_new_object(obj):
 
     if obj == "virus":
         new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
-        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0:
+        count = 0
+        while len([c for c in Globals.cells if new_virus.touching(c)]) != 0 and count < 1000:
             new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
+            count += 1
         Globals.viruses.append(new_virus)
         changes.objects_added.add(new_virus)
     
     if obj == "brown virus":
         new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
-        while len([c for c in Globals.cells if new_brown_virus.touching(c)]) != 0:
+        count = 0
+        while len([c for c in Globals.cells if new_brown_virus.touching(c)]) != 0 and count < 1000:
             new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
+            count += 1
         Globals.brown_viruses.append(new_brown_virus)
         changes.objects_added.add(new_brown_virus)
 
@@ -208,7 +210,7 @@ config = ConfigParser()
 config.read('common/agar.ini')
 
 
-width, height = 1280, 720
+
 
 
 aa_agar = True
@@ -217,6 +219,10 @@ background_color = Colors.black
 font_color = Colors.green
 
 
+width, height = 1280, 720
+window = pygame.display.set_mode([width, height])
+pygame.display.set_caption("Agar.io Clone Server")
+clock = pygame.time.Clock()
 
 
 Globals.camera = Camera()
@@ -238,7 +244,6 @@ Globals.font_width = int(width/100+1)
 Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 objects = []
 
-pygame.display.set_caption("Agar.io Clone Server")
 
 smoothness = 15
 
@@ -250,8 +255,7 @@ def get_random_color():
 
 smooth_fix_limit = 4
 
-window = pygame.display.set_mode([width, height])
-clock = pygame.time.Clock()
+
 
 player = Player("player", get_random_color())
 Globals.players.append(player)
@@ -457,6 +461,7 @@ while playing:
                 for p in Globals.players:
                     if p.mode == "minion":
                         p.split()
+
             if event.key == pygame.K_g:
                 for p in Globals.players:
                     if p.mode == "minion":

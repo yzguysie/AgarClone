@@ -1,8 +1,8 @@
-
+from common.globals import Globals
 class Camera:
     def __init__(self):
-        self.pos_smoothness = 0
-        self.scale_smoothness = .2
+        self.pos_smoothness = .083 # Half life (in seconds) of the difference between true position of the camera and the position from which objects are drawn. (Higher = Smoother, Lower = Snappier, more accurate)
+        self.scale_smoothness = .25 # Half life (in seconds) of the difference between true scale and the scale the camera uses to draw. (Higher = Smoother, Lower = Snappier, more accurate)
 
         self.scale = .15
         self.target_scale = self.scale
@@ -22,35 +22,34 @@ class Camera:
         self.flat_friction = .1
 
     def tick(self):
-        fps = 20
-        #pass
-        # if self.pos_smoothness*fps > 1:
-        #     self.x += (self.target_x-self.x)/(self.pos_smoothness*fps)
-        #     self.y += (self.target_y-self.y)/(self.pos_smoothness*fps)
-        # else:
-        #     self.x, self.y = self.target_x,self.target_y
+        self.x += (self.target_x-self.x)/max(self.pos_smoothness*Globals.fps_, 1)
+        self.y += (self.target_y-self.y)/max(self.pos_smoothness*Globals.fps_, 1)
 
-        if (self.scale_smoothness*fps) > 1:
-            self.scale += (self.target_scale-self.scale)/(self.scale_smoothness*fps)
-        else:
-            self.scale = self.target_scale
+        self.scale += (self.target_scale-self.scale)/max(self.scale_smoothness*Globals.fps_, 1)
+
+
     
     def set_pos(self, x, y):
-        self.x = x
-        self.y = y
+        self.target_x = x
+        self.target_y = y
 
     def set_scale(self, scale):
-        self.scale = scale
         self.target_scale = scale
 
     def get_screen_pos(self, x, y):
-        return (x/self.scale-self.x), (y/self.scale-self.y)
+        return round(x/self.scale-self.x), round(y/self.scale-self.y)
     
     def on_screen(self, x, y, radius):
         pass
 
+    def get_x(self, x):
+        return ((x-640)*self.scale)+self.x
+
+    def get_y(self, y):
+        return (y-360)*self.scale+self.y
+
     def get_screen_x(self, x):
-        return (x/self.scale-self.x)
+        return round((x-self.x)/self.scale+640)
 
     def get_screen_y(self, y):
-        return (y/self.scale-self.x)
+        return round((y-self.y)/self.scale+360)

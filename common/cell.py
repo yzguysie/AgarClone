@@ -27,17 +27,17 @@ class Cell(Drawable):
     def draw(self, window, camera):
         super().draw(window,camera)
 
-        player_font_width = int(self.radius/camera.scale/2+1)
+        player_font_width = int(self.smoothradius/camera.scale/2+1)
         dialogue_font = pygame.font.SysFont(Globals.font, player_font_width)
         
         # Draw Player Name
         dialogue = dialogue_font.render(self.player.mode, True, (255, 255, 255))
-        dialogue_rect = dialogue.get_rect(center = (round(self.x/camera.scale-camera.x), round(self.y/camera.scale-camera.y)))
+        dialogue_rect = dialogue.get_rect(center = (camera.get_screen_x(self.x), camera.get_screen_y(self.y)))
         window.blit(dialogue, dialogue_rect)
 
         # Draw cell mass
         dialogue = dialogue_font.render(str(int(self.mass)), True, (255, 255, 255))
-        dialogue_rect = dialogue.get_rect(center = (round(self.x/camera.scale-camera.x), round(self.y/camera.scale-camera.y+player_font_width)))
+        dialogue_rect = dialogue.get_rect(center = (camera.get_screen_x(self.x), camera.get_screen_y(self.y)+player_font_width))
         window.blit(dialogue, dialogue_rect)
 
 
@@ -94,6 +94,7 @@ class Cell(Drawable):
         
         self.mass /= 2
         new_cell = Cell(self.x, self.y+.1, self.mass, self.color, self.player)
+        new_cell.radius = self.radius # To make it look like the new cell is smoothly transitioning into being half the size
         Globals.cells.append(new_cell)
         self.player.cells.append(new_cell)
         

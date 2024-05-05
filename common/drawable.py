@@ -12,6 +12,7 @@ class Drawable:
         self.mass = mass
         self.radius = math.sqrt(mass)
         self.smoothradius = self.radius
+        self.smoothness = .25 # Half life in seconds of the difference between true radius and radius drawn. (Higher = Smoother, Lower = Snappier, more accurate)
         self.color = color
         self.outline_color = (self.color[0]/1.5,self.color[1]/1.5, self.color[2]/1.5)
         self.outline_thickness = 3
@@ -25,18 +26,18 @@ class Drawable:
              
         self.radius = math.sqrt(self.mass)
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
-        self.smoothradius += (self.radius - self.smoothradius)/(Globals.fps_/2)
+        self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
 
         #Draw Outline
         if self.outline_thickness > 0 and outline:
             if aa:
-                pygame.gfxdraw.aacircle(window, round(self.x/Globals.camera.scale-Globals.camera.x), round(self.y/Globals.camera.scale-Globals.camera.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
-            pygame.gfxdraw.filled_circle(window, round(self.x/Globals.camera.scale-Globals.camera.x), round(self.y/Globals.camera.scale-Globals.camera.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
+                pygame.gfxdraw.aacircle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
+            pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
         
         #Draw Inside
         if aa:
-            pygame.gfxdraw.aacircle(window, round(self.x/Globals.camera.scale-Globals.camera.x), round(self.y/Globals.camera.scale-Globals.camera.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
-        pygame.gfxdraw.filled_circle(window, round(self.x/Globals.camera.scale-Globals.camera.x), round(self.y/Globals.camera.scale-Globals.camera.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
+            pygame.gfxdraw.aacircle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
+        pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
 
 
     def tick(self):
