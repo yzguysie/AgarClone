@@ -114,8 +114,6 @@ def server_tick():
     global info
 
     target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-    target_camera_x = target_camera_x/Globals.camera.scale-screen_width/2
-    target_camera_y = target_camera_y/Globals.camera.scale-screen_height/2
     #camera.x += (target_camera_x-camera.x)/1
     #camera.y += (target_camera_y-camera.y)/1
     Globals.camera.set_pos(target_camera_x, target_camera_y)
@@ -142,10 +140,7 @@ def game_tick():
 
     try:
         target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-        target_camera_x = target_camera_x/Globals.camera.scale-screen_width/2
-        target_camera_y = target_camera_y/Globals.camera.scale-screen_height/2
-        #camera.x += (target_camera_x-camera.x)/1
-        #camera.y += (target_camera_y-camera.y)/1
+
         Globals.camera.set_pos(target_camera_x, target_camera_y)
         Globals.camera.tick()
     except:
@@ -319,7 +314,6 @@ aa_text = True
 info = ClientInfo()
 
 def update(change):
-    print(change)
     count = 0
 
     if change == None:
@@ -328,7 +322,6 @@ def update(change):
     while change != None:
         one_update(change)
 
-        print(change)
         change = change.next_batch
         count += 1
 
