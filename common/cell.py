@@ -87,7 +87,7 @@ class Cell(Drawable):
         self.extraxspeed /= 1.05
         self.extrayspeed /= 1.05
 
-    def split(self):
+    def split(self, extra_speed = True):
         
         if len(self.player.cells) > Globals.player_max_cells or self.mass < Globals.player_split_min_mass:
                 return
@@ -98,29 +98,28 @@ class Cell(Drawable):
         Globals.cells.append(new_cell)
         self.player.cells.append(new_cell)
         
-
-        extrax = (self.xspeed)*Globals.gamespeed*100
-        extray = (self.yspeed)*Globals.gamespeed*100
-
-
-
-       
-       
-        total_speed = math.sqrt(extrax**2+extray**2)
-       
+        if extra_speed:
+            extrax = (self.xspeed)*Globals.gamespeed*100
+            extray = (self.yspeed)*Globals.gamespeed*100
+        
+        else:
+            extrax = 0
+            extray = 0
+        
         if extrax**2+extray**2 > Globals.player_speed**2*2:
+                total_speed = math.sqrt(extrax**2+extray**2)
                 percent_x = extrax/total_speed
                 percent_y = extray/total_speed
 
-               
-                       
-               
+            
+                    
+            
                 extrax = Globals.player_speed*percent_x*2
                 extray = Globals.player_speed*percent_y*2
 
         Globals.cells[len(Globals.cells)-1].extraxspeed = extrax*Globals.cells[len(Globals.cells)-1].radius**(2/3)
         Globals.cells[len(Globals.cells)-1].extrayspeed = extray*Globals.cells[len(Globals.cells)-1].radius**(2/3)
-
+        return new_cell
 
     def tick(self):
         self.apply_physics()
@@ -140,28 +139,31 @@ class Cell(Drawable):
     def consume_virus(self, virus):
         self.mass += virus.mass
         Globals.objects_to_delete.add(virus.id)
-        while len(self.player.cells) < Globals.player_max_cells and self.mass > Globals.player_split_min_mass:
-                self.split()
+        cells_affected = [self]
+        for _ in range(16):
+            for cell in cells_affected:
+                if len(self.player.cells) < Globals.player_max_cells and cell.mass > Globals.player_split_min_mass:
+                    cells_affected.append(cell.split(extra_speed = False))
 
 
     def consume_brown_virus(self, virus):
         self.mass += virus.mass
         Globals.objects_to_delete.add(virus.id)
-        while len(self.player.cells) < Globals.player_max_cells and self.mass > Globals.player_split_min_mass:
-                self.split()  
+        cells_affected = [self]
+        for _ in range(16):
+            for cell in cells_affected:
+                if len(self.player.cells) < Globals.player_max_cells and cell.mass > Globals.player_split_min_mass:
+                    cells_affected.append(cell.split(extra_speed = False))
                
    
 
     def check_viruses(self, viruses):
         for virus in viruses:
-            if self.mass*1.3 < virus.mass:
-                if (virus.x-self.x)**2+(virus.y-self.y)**2 < (virus.radius-self.radius/3)**2:
-                    if self.id not in Globals.objects_to_delete and virus.id not in Globals.objects_to_delete:
-                        virus.consume(self)
-            if self.mass > virus.mass*1.3:
-                if (virus.x-self.x)**2+(virus.y-self.y)**2 < (self.radius-virus.radius/3)**2:
-                    if self.id not in Globals.objects_to_delete and virus.id not in Globals.objects_to_delete:
-                        self.consume_virus(virus)
+            if self.can_consume(virus):
+                self.consume_virus(virus)
+            elif virus.can_consume(self):
+                virus.consume(self)
+            
 
        
     def eject_mass(self):
@@ -190,10 +192,12 @@ class Cell(Drawable):
                                 angle = math.atan2(ydiff, xdiff)
                                 vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
                                 velocity = min(((max_dist)-self.distance_to(other)), move_speed*Globals.gamespeed) # cells will never become too far apart, and not too quickly
-                                self.x += vector[0]*velocity/2
-                                self.y += vector[1]*velocity/2
-                                other.x -= vector[0]*velocity/2
-                                other.y -= vector[1]*velocity/2
+                                combined_mass = self.mass+other.mass
+
+                                self.x += vector[0]*velocity*(other.mass/combined_mass)
+                                self.y += vector[1]*velocity*(other.mass/combined_mass)
+                                other.x -= vector[0]*velocity*(self.mass/combined_mass)
+                                other.y -= vector[1]*velocity*(self.mass/combined_mass)
 
 
                                 

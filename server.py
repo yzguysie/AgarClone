@@ -219,13 +219,14 @@ background_color = Colors.black
 font_color = Colors.green
 
 
-width, height = 1280, 720
-window = pygame.display.set_mode([width, height])
+screen_width, screen_height = 1280, 720
+screen_fullscreen : bool = False
+window = pygame.display.set_mode([screen_width, screen_height], pygame.RESIZABLE)
 pygame.display.set_caption("Agar.io Clone Server")
 clock = pygame.time.Clock()
 
 
-Globals.camera = Camera()
+Globals.camera = Camera(window)
 Globals.camera.x = 0
 Globals.camera.y = 0
 target_scale = 105
@@ -240,7 +241,7 @@ ejected_to_calculate = set()
 
 
 Globals.font = 'arial'
-Globals.font_width = int(width/100+1)
+Globals.font_width = int(screen_width/100+1)
 Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 objects = []
 
@@ -414,7 +415,7 @@ while playing:
 
     target_scale/= max(len(player.cells)**(1/1.5), 1)
 
-    Globals.camera.set_scale(target_scale)
+    Globals.camera.set_scale(target_scale*720/screen_height)
 
     total_mass = sum(cell.mass for cell in player.cells)
 
@@ -446,6 +447,9 @@ while playing:
             playing = False
             break
 
+        if event.type == pygame.VIDEORESIZE:
+            screen_width, screen_height = window.get_size()
+
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 playing = False
@@ -467,11 +471,14 @@ while playing:
                     if p.mode == "minion":
                         p.eject_mass()
             if event.key == pygame.K_F11:
-                if width == 1920:
-                        width, height = 1280, 720
-                if width == 1280:
-                        width, height = 1920, 1080
-                window = pygame.display.set_mode([width, height])
+                screen_fullscreen = not screen_fullscreen
+                if screen_fullscreen:
+                    pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+                else:
+                    pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
+                screen_width, screen_height = window.get_size()
+
+
     if pygame.key.get_pressed()[pygame.K_e]:
         for thing in player.cells:
             if thing.mass > Globals.player_eject_min_mass and thing.mass > Globals.ejected_loss:

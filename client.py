@@ -114,8 +114,8 @@ def server_tick():
     global info
 
     target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-    target_camera_x = target_camera_x/Globals.camera.scale-width/2
-    target_camera_y = target_camera_y/Globals.camera.scale-height/2
+    target_camera_x = target_camera_x/Globals.camera.scale-screen_width/2
+    target_camera_y = target_camera_y/Globals.camera.scale-screen_height/2
     #camera.x += (target_camera_x-camera.x)/1
     #camera.y += (target_camera_y-camera.y)/1
     Globals.camera.set_pos(target_camera_x, target_camera_y)
@@ -142,8 +142,8 @@ def game_tick():
 
     try:
         target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-        target_camera_x = target_camera_x/Globals.camera.scale-width/2
-        target_camera_y = target_camera_y/Globals.camera.scale-height/2
+        target_camera_x = target_camera_x/Globals.camera.scale-screen_width/2
+        target_camera_y = target_camera_y/Globals.camera.scale-screen_height/2
         #camera.x += (target_camera_x-camera.x)/1
         #camera.y += (target_camera_y-camera.y)/1
         Globals.camera.set_pos(target_camera_x, target_camera_y)
@@ -249,7 +249,11 @@ minion_start_mass = config.getint('settings', 'minion_start_mass')
 
 
 
-width, height = 1280, 720
+screen_width, screen_height = 1280, 720
+screen_fullscreen : bool = False
+window = pygame.display.set_mode([screen_width, screen_height], pygame.RESIZABLE)
+clock = pygame.time.Clock()
+pygame.display.set_caption("Agar.io Clone")
 
 #virus_image = pygame.image.load("resources/images/virus.png")
 
@@ -261,10 +265,7 @@ font_color = Colors.green
 
 
 
-Globals.camera = Camera()
-Globals.camera.x = 0
-Globals.camera.y = 0
-target_scale = 105
+Globals.camera = Camera(window)
 
 
 
@@ -276,19 +277,14 @@ ejected_to_calculate = set()
 
 
 font = 'arial'
-font_width = int(width/100+1)
+font_width = int(screen_width/100+1)
 dialogue_font = pygame.font.SysFont(font, font_width)
-objects = []
-
-pygame.display.set_caption("Agar.io Clone")
-
-smoothness = 15
 
 
-smooth_fix_limit = 4
 
-window = pygame.display.set_mode([width, height])
-clock = pygame.time.Clock()
+
+
+
 
 player = Player("player", Colors.blue)
 Globals.players.append(player)
@@ -369,7 +365,6 @@ info_ = n.getId()
 use_data(info_)
 player_id = info_.player.id
 
-fps = 30
 while playing:
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')
@@ -380,7 +375,9 @@ while playing:
 
 
     changes = n.send(info)
-    update(changes)
+    if update(changes) == 0:
+        #FIXME - Add interpolation frames
+        pass
     info.split = False
     info.eject = False
 
@@ -418,6 +415,9 @@ while playing:
         if event.type == pygame.QUIT:
             playing = False
             break
+        
+        if event.type == pygame.VIDEORESIZE:
+            screen_width, screen_height = window.get_size()
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
@@ -431,11 +431,12 @@ while playing:
                 info.eject = True
 
             if event.key == pygame.K_F11:
-                if width == 1920:
-                        width, height = 1280, 720
-                if width == 1280:
-                        width, height = 1920, 1080
-                window = pygame.display.set_mode([width, height])
+                screen_fullscreen = not screen_fullscreen
+                if screen_fullscreen:
+                    pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+                else:
+                    pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
+                screen_width, screen_height = window.get_size()
     if pygame.key.get_pressed()[pygame.K_e]:
         info.eject = True
     if pygame.key.get_pressed()[pygame.K_z]:
