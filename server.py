@@ -303,9 +303,10 @@ connected = []
 #changes = []
 
 changes_to_send: dict[int, ServerChanges] = {}
-last_change = changes
+last_change = None
 def threaded_client(conn, player_id):
     global changes
+
     connected.append(conn)
     changes_to_send[player_id] = None # FIXME Could cause last change to be doubled on client (Idk bruh fml)
 
@@ -335,7 +336,7 @@ def threaded_client(conn, player_id):
                         
                 # print("Recieved: ", cl_data)
                 # print("Sending :", info)
-                conn.send(pickle.dumps(copy.deepcopy(changes_to_send[player_id])))
+                conn.send(pickle.dumps((changes_to_send[player_id])))
                 changes_to_send[player_id] = None
         except:
             break
@@ -528,8 +529,10 @@ while playing:
     changes.cells = copy.deepcopy(Globals.cells)
     changes.players = copy.deepcopy(Globals.players)
     changes.ejected = copy.deepcopy(Globals.ejected)
-    last_change.next_batch = changes
-    last_change = changes
+    if last_change:
+        last_change.next_batch = changes
+    last_change = copy.deepcopy(changes)
+    changes = ServerChanges()
     for p in changes_to_send:
         if changes_to_send[p] == None:
             changes_to_send[p] = last_change
