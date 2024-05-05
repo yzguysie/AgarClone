@@ -322,22 +322,22 @@ aa_text = True
 
 info = ClientInfo()
 
-def update(changes) -> None:
-    for obj in changes.objects_added:
-        if type(obj) == Agar:
-            Globals.agars.add(obj)
-        elif type(obj) == Virus:
-            Globals.viruses.append(obj)
-        elif type(obj) == BrownVirus:
-            Globals.brown_viruses.append(obj)
-    Globals.agars = set([agar for agar in Globals.agars if agar.id not in changes.objects_deleted])
-    Globals.viruses = [virus for virus in Globals.viruses if virus.id not in changes.objects_deleted]
-    Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in changes.objects_deleted]
+def update(change):
+    count = 1
+    if change == None:
+        return 0
+    
+    update(change)
+    while change.next_batch != None:
+        update(change.next_batch)
+        change = change.next_batch
+        count += 1
 
 
     Globals.players = changes.players
     Globals.cells = changes.cells
     Globals.ejected = changes.ejected
+    return count
 
 def use_data(data):
     # players = data.players
@@ -348,6 +348,18 @@ def use_data(data):
     Globals.cells = data.cells
     Globals.players = data.players
 
+def one_update(update):
+    
+    for obj in update.objects_added:
+        if type(obj) == Agar:
+            Globals.agars.add(obj)
+        elif type(obj) == Virus:
+            Globals.viruses.append(obj)
+        elif type(obj) == BrownVirus:
+            Globals.brown_viruses.append(obj)
+    Globals.agars = set([agar for agar in Globals.agars if agar.id not in update.objects_deleted])
+    Globals.viruses = [virus for virus in Globals.viruses if virus.id not in update.objects_deleted]
+    Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in update.objects_deleted]
 
 n = Network()
 info_ = n.getId()

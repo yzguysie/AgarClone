@@ -300,10 +300,16 @@ s.listen()
 print("Waiting for a connection, Server Started")
 
 connected = []
+#changes = []
 
+changes_to_send: dict[int, ServerChanges] = {}
+last_change = changes
 def threaded_client(conn, player_id):
     global changes
-    #connected.append(conn)
+    connected.append(conn)
+    changes_to_send[player_id] = None # FIXME Could cause last change to be doubled on client (Idk bruh fml)
+
+
     new_player = Player("player", get_random_color())
     Globals.players.append(new_player)
     info.player = new_player
@@ -311,7 +317,7 @@ def threaded_client(conn, player_id):
 
     while True:
         try:
-            cl_data = pickle.loads(conn.recv(4096*1024))
+            cl_data = pickle.loads(conn.recv(4*1024*1024))
 
             if not cl_data:
                 print("Disconnected from ", conn)
@@ -329,7 +335,8 @@ def threaded_client(conn, player_id):
                         
                 # print("Recieved: ", cl_data)
                 # print("Sending :", info)
-                conn.send(pickle.dumps(changes))
+                conn.send(pickle.dumps(copy.deepcopy(changes_to_send[player_id])))
+                changes_to_send[player_id] = None
         except:
             break
 
@@ -337,6 +344,7 @@ def threaded_client(conn, player_id):
     connected.remove(conn)
     conn.close()
     Globals.players.remove(new_player)
+    del changes_to_send[player_id]
     return
 
 
@@ -371,7 +379,7 @@ while playing:
                 #FIXME - make cells never spawn on viruses or in other cells
                 if len(Globals.ejected) > 0:
                     e = Globals.ejected[0]
-                    Globals.objects_to_delete.add(e)
+                    Globals.objects_to_delete.add(e.id)
                     new_cell = Cell(e.x, e.y, Globals.player_start_mass, p.color, p)
                 else:
                     new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
@@ -520,7 +528,11 @@ while playing:
     changes.cells = copy.deepcopy(Globals.cells)
     changes.players = copy.deepcopy(Globals.players)
     changes.ejected = copy.deepcopy(Globals.ejected)
-
+    last_change.next_batch = changes
+    last_change = changes
+    for p in changes_to_send:
+        if changes_to_send[p] == None:
+            changes_to_send[p] = last_change
     
     Globals.objects_to_delete = set()
 
