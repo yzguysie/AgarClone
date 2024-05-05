@@ -323,13 +323,16 @@ aa_text = True
 info = ClientInfo()
 
 def update(change):
-    count = 1
+    print(change)
+    count = 0
+
     if change == None:
         return 0
     
-    update(change)
-    while change.next_batch != None:
-        update(change.next_batch)
+    while change != None:
+        one_update(change)
+
+        print(change)
         change = change.next_batch
         count += 1
 
