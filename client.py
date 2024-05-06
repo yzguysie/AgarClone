@@ -25,6 +25,7 @@ from common.virus import Virus
 from common.brownvirus import BrownVirus
 from common.serverinfo import ServerInfo
 from common.clientinfo import ClientInfo
+from common.colors import Colors
 import cProfile
 import re
 
@@ -35,127 +36,30 @@ make it so when one cell increases mass, camera moves smoothly
 idk
 """
 
+def game_tick():
+    player.update_target(Globals.camera, Globals.agars)
+    info.target = player.target
 
-class Colors:
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
-    blue = (25, 55, 225)
-
-    light_red = (255, 64, 64)
-    dark_red = (128, 0, 0)
-    light_green = (64, 255, 64)
-    dark_green = (0, 128, 0)    
-
-    yellow = (255, 255, 0)
-    purple = (255, 0, 255)
-    turquoise = (0, 255, 255)
-    cyan = turquoise
-
-    brown = (139,69,19)
-    brown = (139,69,19)
-    brown = (150,75,0)
-
-    gray = (128, 128, 128)
-    dark_gray = (64, 64, 64)
-    light_gray = (192, 192, 192)
-    light_blue = (102, 178, 255)
-    dark_blue = (0, 0, 192)
-
-class Sprite:
-    def __init__(self, image, x, y, rotation):
-        self.x = x
-        self.y = y
-        self.ogimage = image
-        self.image = self.ogimage
-        self.rotation = rotation
-
-    def draw(self):
-        self.image = pygame.transform.rotate(self.ogimage, self.rotation)
-        window.blit(self.image, Globals.camera.get_screen_pos(self.x, self.y))
-
-
-
-def mouse_in_game_pos():
-    x,y = pygame.mouse.get_pos()
-    return((x+Globals.camera.x)*Globals.camera.scale, (y+Globals.camera.y)*Globals.camera.scale)
-
-def new_cell(player, color):
-    new_cell = Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, color, player)
-    Globals.cells.append(new_cell)
-    return new_cell
-
-def calc_center_of_mass(bodies):
-        try:
-            center_x = 0
-            center_y = 0
-            weight = 0
-            for body_ in bodies:
-                center_x += body_.x*body_.mass
-                center_y += body_.y*body_.mass
-                weight += body_.mass
-            return (center_x/weight, center_y/weight)
-        except:
-            print("divide by 0")
-            return (10, 10)
 
 def game_draw():
+    target_camera_x, target_camera_y = player.calc_center_of_mass()
+    Globals.camera.set_pos(target_camera_x, target_camera_y)
+    Globals.camera.tick()
     all_objs = list(all_drawable())
     all_objs.sort(key=lambda x: x.radius)
     for obj in all_objs:
         obj.draw(window, Globals.camera)
 
 
-def server_tick():
+def interpolate():
 
-    global info
+    Globals.tickrate = 1/delta_time
+    Globals.gamespeed = delta_time
 
-    target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-    #camera.x += (target_camera_x-camera.x)/1
-    #camera.y += (target_camera_y-camera.y)/1
-    Globals.camera.set_pos(target_camera_x, target_camera_y)
-    Globals.camera.tick()
-
-
-
-    
-    all_objs = list(all_drawable())
+    all_objs = list(all_drawable(agars_ = False, ejected_ = True, viruses_ = False, brown_viruses = False, cells_ = True))
     for thing in all_objs:
-        if type(thing) != Cell:
-            thing.tick()
+        thing.tick()
 
-
-    player.update_target(Globals.camera, Globals.agars)
-    for player_ in Globals.players:
-        #player_.update_target(Globals.camera, Globals.agars)
-        player_.tick()
-
-
-def game_tick():
-    player.update_target(Globals.camera, Globals.agars)
-    info.target = player.target
-
-    try:
-        target_camera_x, target_camera_y = calc_center_of_mass(player.cells)
-
-        Globals.camera.set_pos(target_camera_x, target_camera_y)
-        Globals.camera.tick()
-    except:
-        pass
-
-
-
-def near_cells(thing):
-    for cell in Globals.cells:
-        if abs(cell.x-thing.x) < cell.radius+20:
-            if abs(cell.y-thing.y) < cell.radius+20:
-                if (cell.x-thing.x)**2+(cell.y-thing.y)**2 < (cell.radius+20)**2:
-                    return True
-
-    return False
 
 def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True):
     if agars_:
@@ -194,7 +98,7 @@ config = ConfigParser()
 # parse existing file
 config.read('common/agar.ini')
 
-# read values from a section
+#read values from a section
 fps = config.getint('settings', 'fps')
 speed = config.getfloat('settings', 'speed')
 
@@ -358,6 +262,8 @@ info_ = n.getId()
 use_data(info_)
 player_id = info_.player.id
 
+delta_time = 1/Globals.tickrate
+
 while playing:
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')
@@ -369,8 +275,7 @@ while playing:
 
     changes = n.send(info)
     if update(changes) == 0:
-        #FIXME - Add interpolation frames
-        pass
+        interpolate()
     info.split = False
     info.eject = False
 
@@ -462,10 +367,10 @@ while playing:
     pygame.display.flip()
 
 
-   
+    delta_time = time.time()-start
     clock.tick(fps)
     if frames % int(fps/2) == 0:
-        fps_ = round(1/(time.time()-start))
+        Globals.fps_ = round(1/(time.time()-start))
         last_time = time.time()
     frames += 1
 

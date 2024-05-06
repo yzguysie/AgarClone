@@ -15,8 +15,8 @@ class Agar(Drawable):
         self.check_colliding(Globals.cells)
         self.x += self.xspeed
         self.y += self.yspeed
-        self.xspeed /= 1+(12/Globals.fps)
-        self.yspeed /= 1+(12/Globals.fps)
+        self.xspeed /= 1+(12/Globals.tickrate)
+        self.yspeed /= 1+(12/Globals.tickrate)
         if abs(self.xspeed) < .01:
             self.xspeed = 0
         if abs(self.yspeed) < .01:
@@ -36,7 +36,7 @@ class Agar(Drawable):
             self.yspeed *= -.5
         
         if Globals.agar_grow:
-            if self.mass < Globals.agar_max_mass and random.randint(0, round(Globals.fps/Globals.agar_grow_speed)) == 1:
+            if self.mass < Globals.agar_max_mass and random.randint(0, round(Globals.tickrate/Globals.agar_grow_speed)) == 1:
                 self.grow()
 
     def grow(self):

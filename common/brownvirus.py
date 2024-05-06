@@ -15,16 +15,16 @@ class BrownVirus(Drawable):
 
     def tick(self):
         spit_rate = 120
-        if Globals.fps < spit_rate:
-            for i in range(round(spit_rate/Globals.fps)):
+        if Globals.tickrate < spit_rate:
+            for i in range(round(spit_rate/Globals.tickrate)):
                 if self.mass > self.startmass:
                     self.spit()
         else:
-            if (Globals.frames%(round(Globals.fps/spit_rate)) == 0):
+            if (Globals.frames%(round(Globals.tickrate/spit_rate)) == 0):
                 if self.mass > self.startmass:
                     self.spit()
         
-        if random.randint(0, Globals.fps) == 0 and len(Globals.agars) < Globals.max_agars:
+        if random.randint(0, Globals.tickrate) == 0 and len(Globals.agars) < Globals.max_agars:
             self.spit() 
 
         self.check_consume()

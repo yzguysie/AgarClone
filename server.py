@@ -28,7 +28,7 @@ from common.serverinfo import ServerInfo
 from common.serverchanges import ServerChanges
 
 from common.clientinfo import ClientInfo
-
+from common.colors import Colors
 
 """
 Todo:
@@ -36,55 +36,6 @@ optimize game
 make it so when one cell increases mass, camera moves smoothly
 idk
 """
-
-
-class Colors:
-    white = (255, 255, 255)
-    black = (0, 0, 0)
-
-    red = (255, 0, 0)
-    green = (0, 255, 0)
-    blue = (0, 0, 255)
-    blue = (25, 55, 225)
-
-    light_red = (255, 64, 64)
-    dark_red = (128, 0, 0)
-    light_green = (64, 255, 64)
-    dark_green = (0, 128, 0)    
-
-    yellow = (196, 196, 0)
-    orange = (255, 127, 0)
-    purple = (127, 0, 255)
-    pink = (255, 16, 196)
-    turquoise = (0, 255, 255)
-    good_color = (32, 255, 168)
-    cyan = turquoise
-
-    brown = (139,69,19)
-    brown = (139,69,19)
-    brown = (150,75,0)
-
-    gray = (128, 128, 128)
-    dark_gray = (64, 64, 64)
-    light_gray = (192, 192, 192)
-    light_blue = (102, 178, 255)
-    dark_blue = (0, 0, 192)
-
-class Sprite:
-    def __init__(self, image, x, y, rotation):
-        self.x = x
-        self.y = y
-        self.ogimage = image
-        self.image = self.ogimage
-        self.rotation = rotation
-
-    def draw(self):
-        self.image = pygame.transform.rotate(self.ogimage, self.rotation)
-        window.blit(self.image, Globals.camera.get_screen_pos(self.x, self.y))
-
-
-
-
 
 
 def game_draw():
@@ -101,8 +52,6 @@ def game_tick():
     Globals.camera.tick()
 
 
-
-
     #Bot AI (I think idk I wrote this like 2 yrs ago)
     # for bot in players:
     #     if bot != players[player]: #Make sure not to control player, only bots
@@ -117,10 +66,9 @@ def game_tick():
     #                         break
 
     
-    all_objs = list(all_drawable())
+    all_objs = list(all_drawable(cells_ = False))
     for thing in all_objs:
-        if type(thing) != Cell:
-            thing.tick()
+        thing.tick()
 
 
 
@@ -137,15 +85,6 @@ def game_tick():
     info.viruses = copy.deepcopy(Globals.viruses)
     info.brown_viruses = copy.deepcopy(Globals.brown_viruses)
     info.ejected = copy.deepcopy(Globals.ejected)
-
-def near_cells(thing):
-    for cell in Globals.cells:
-        if abs(cell.x-thing.x) < cell.radius+20:
-            if abs(cell.y-thing.y) < cell.radius+20:
-                if (cell.x-thing.x)**2+(cell.y-thing.y)**2 < (cell.radius+20)**2:
-                    return True
-
-    return False
 
 def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True):
     if agars_:
@@ -405,7 +344,7 @@ while playing:
         create_new_object("brown virus")
    
     if len(Globals.agars) < Globals.max_agars:
-        if frames%int(len(Globals.agars)/25000*Globals.fps+1) == 0:
+        if frames%int(len(Globals.agars)/25000*Globals.tickrate+1) == 0:
             create_new_object("agar")
 
     target_scale = 0
@@ -512,10 +451,10 @@ while playing:
     pygame.display.flip()
 
    
-    clock.tick(Globals.fps)
-    if frames % int(Globals.fps/2) == 0:
+    clock.tick(Globals.tickrate)
+    if frames % int(Globals.tickrate/2) == 0:
         Globals.fps_ = round(1/(time.time()-start))
-        Globals.gamespeed = min(1/Globals.fps_, 1/Globals.fps*Globals.smooth_fix_limit)
+        Globals.gamespeed = min(1/Globals.fps_, 1/Globals.tickrate*Globals.smooth_fix_limit)
         last_time = time.time()
     frames += 1
 
@@ -531,10 +470,10 @@ while playing:
     for cell in Globals.cells:
         if cell.mass > Globals.player_max_cell_mass:
             cell.split()
-    for i in range(len(Globals.players)):
-        thing = player.cells
-        if len(thing) < 1:
-             Globals.cells.append(Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, Colors.red, Globals.players[i]))
+    # for i in range(len(Globals.players)):
+    #     thing = player.cells
+    #     if len(thing) < 1:
+    #          Globals.cells.append(Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, Colors.red, Globals.players[i]))
     for p in Globals.players:
         p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
 
@@ -542,7 +481,7 @@ while playing:
     changes.players = copy.deepcopy(Globals.players)
     changes.ejected = copy.deepcopy(Globals.ejected)
     if last_change:
-        last_change.next_batch = changes
+        last_change.next_batch = copy.deepcopy(changes)
     last_change = copy.deepcopy(changes)
     changes = ServerChanges()
     for p in changes_to_send:

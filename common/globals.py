@@ -21,9 +21,10 @@ class Globals:
     config.read('common/agar.ini')
 
     # read values from a section
+    tickrate = config.getint('settings', 'tickrate')
     fps = config.getint('settings', 'fps')
     fps_ = fps
-    gamespeed = 1/fps
+    gamespeed = 1/tickrate
     speed = config.getfloat('settings', 'speed')
 
     gamemode = config.getint('settings', 'gamemode')

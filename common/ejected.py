@@ -26,11 +26,11 @@ class Ejected(Drawable):
         self.radius = math.sqrt(self.mass)
         self.smoothradius += (self.radius - self.smoothradius)/15
         global ejected_size
-        self.x += self.xspeed/Globals.fps
-        self.y += self.yspeed/Globals.fps
+        self.x += self.xspeed/Globals.tickrate
+        self.y += self.yspeed/Globals.tickrate
 
-        self.xspeed /= 1+(6/Globals.fps)
-        self.yspeed /= 1+(6/Globals.fps)
+        self.xspeed /= 1+(6/Globals.tickrate)
+        self.yspeed /= 1+(6/Globals.tickrate)
 
 
         if self.x > Globals.border_width:

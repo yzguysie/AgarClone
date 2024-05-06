@@ -12,8 +12,8 @@ class Virus(Drawable):
         self.check_ejected(Globals.ejected)
         self.x += self.xspeed
         self.y += self.yspeed
-        self.xspeed /= (1 + (12/Globals.fps))
-        self.yspeed /= (1 + (12/Globals.fps))
+        self.xspeed /= (1 + (12/Globals.tickrate))
+        self.yspeed /= (1 + (12/Globals.tickrate))
 
     def check_colliding(self, cells):
         for cell in cells:
@@ -22,8 +22,8 @@ class Virus(Drawable):
 
     def split(self, e):
         new_virus = Virus(self.x, self.y, Globals.virus_mass, self.color)
-        new_virus.xspeed = e.vector[0]*500/Globals.fps
-        new_virus.yspeed = e.vector[1]*500/Globals.fps
+        new_virus.xspeed = e.vector[0]*500/Globals.tickrate
+        new_virus.yspeed = e.vector[1]*500/Globals.tickrate
         Globals.viruses.append(new_virus)
         self.mass = Globals.virus_mass
 

@@ -13,7 +13,7 @@ class Cell(Drawable):
         self.extraxspeed = 0
         self.extrayspeed = 0
         self.slow_zone = 10
-        self.speed = 1
+        self.speed = Globals.player_speed
         self.xspeed = 0
         self.yspeed = 0
         self.inertia = 5
@@ -126,7 +126,7 @@ class Cell(Drawable):
        
     def apply_physics(self):
         if self.mass > Globals.player_min_mass:
-            if Globals.fps_ < Globals.fps/Globals.smooth_fix_limit or Globals.fps_ > Globals.fps*Globals.smooth_fix_limit:
+            if Globals.fps_ < Globals.tickrate/Globals.smooth_fix_limit or Globals.fps_ > Globals.tickrate*Globals.smooth_fix_limit:
                 self.mass -= self.mass*Globals.player_decay_rate*Globals.gamespeed
             else:
                 self.mass -= self.mass*Globals.player_decay_rate*Globals.gamespeed
