@@ -8,7 +8,7 @@ import cProfile
 import re
 from network import Network
 import pickle
-
+from _thread import *
 import pygame
 import pygame.gfxdraw
 import math
@@ -56,7 +56,7 @@ def interpolate():
     Globals.tickrate = 1/delta_time
     Globals.gamespeed = delta_time
 
-    all_objs = list(all_drawable(agars_ = False, ejected_ = True, viruses_ = False, brown_viruses = False, cells_ = True))
+    all_objs = list(all_drawable(agars_ = False, ejected_ = True, viruses_ = False, brown_viruses_ = False, cells_ = True))
     for thing in all_objs:
         thing.tick()
 
@@ -225,14 +225,14 @@ def update(change):
     
     while change != None:
         one_update(change)
-
+        Globals.players = change.players
+        Globals.cells = change.cells
+        Globals.ejected = change.ejected
         change = change.next_batch
         count += 1
 
 
-    Globals.players = changes.players
-    Globals.cells = changes.cells
-    Globals.ejected = changes.ejected
+    
     return count
 
 def use_data(data):
@@ -264,6 +264,13 @@ player_id = info_.player.id
 
 delta_time = 1/Globals.tickrate
 
+def threaded_update(useless, useless2):
+    while True:
+        changes = n.send(info)
+        update(changes)
+
+start_new_thread(threaded_update (1, 2))
+
 while playing:
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')
@@ -273,9 +280,10 @@ while playing:
     window.fill(background_color)
 
 
-    changes = n.send(info)
-    if update(changes) == 0:
-        interpolate()
+    
+
+    interpolate()
+
     info.split = False
     info.eject = False
 
@@ -347,7 +355,7 @@ while playing:
 
     dialogue = dialogue_font.render("Mass: " + str(int(total_mass+.5)), aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    dialogue = dialogue_font.render("FPS: " + str(fps_), aa_text, font_color)
+    dialogue = dialogue_font.render("FPS: " + str(Globals.fps_), aa_text, font_color)
     dialogue_rect = dialogue.get_rect(center=(100, 100))
     window.blit(dialogue, dialogue_rect)
    
