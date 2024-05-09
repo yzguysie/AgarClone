@@ -3,6 +3,7 @@ import pygame.gfxdraw
 import math
 import random
 import time
+import copy
 from configparser import ConfigParser
 import cProfile
 import re
@@ -60,6 +61,10 @@ def interpolate():
     for thing in all_objs:
         thing.tick()
 
+
+
+
+    
 
 def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True):
     if agars_:
@@ -263,15 +268,25 @@ use_data(info_)
 player_id = info_.player.id
 
 delta_time = 1/Globals.tickrate
-
+new_info = False
 def threaded_update(useless, useless2):
+    global new_info
     while True:
-        changes = n.send(info)
-        update(changes)
+        try:
+            if new_info:
+                changes = n.send(info)
+                update(changes)
+                new_info = False
+                info.split = False
+                info.eject = False
+        except Exception as e: 
+            print(e)
+            return
 
-start_new_thread(threaded_update (1, 2))
+start_new_thread(threaded_update, (1, 2))
 
 while playing:
+    
     start = time.time()
     #cProfile.run('game_tick()', sort='cumtime')
 
@@ -281,11 +296,12 @@ while playing:
 
 
     
+    #update(changes)
+    if new_info:
+        interpolate()
+    
+    new_info = True
 
-    interpolate()
-
-    info.split = False
-    info.eject = False
 
 
 

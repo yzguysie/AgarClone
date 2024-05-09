@@ -22,7 +22,7 @@ class Drawable:
         self.consumable = True
 
 
-    def draw(self, window, camera, aa=True, outline=True):
+    def draw(self, window, camera, aa=True, outline=True) -> None:
              
         self.radius = math.sqrt(self.mass)
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
@@ -40,34 +40,34 @@ class Drawable:
         pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
 
 
-    def tick(self):
+    def tick(self) -> None:
         self.check_consume()
 
-    def distance_to(self, other, squared = False):
+    def distance_to(self, other: "Drawable", squared = False) -> float:
         if squared:
             return (self.x-other.x)**2+(self.y-other.y)**2
         return math.sqrt((self.x-other.x)**2+(self.y-other.y)**2)
 
-    def touching(self, other):
+    def touching(self, other) -> bool:
         return math.pow((self.x-other.x), 2) + math.pow((self.y-other.y), 2) < math.pow((self.radius+other.radius), 2) 
     
-    def overlapping(self, other):
-        return (self.x-other.x)**2 + (self.y-other.y)**2 < (self.radius-other.radius/3)**2
+    def overlapping(self, other) -> bool:
+        return math.pow(self.x-other.x, 2) + math.pow(self.y-other.y, 2) < math.pow(self.radius-other.radius/3, 2)
     
-    def can_consume(self, other):
+    def can_consume(self, other) -> bool:
         if other.consumable and other.id != self.id:
             if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
                 return self.mass > other.mass*1.3 and self.overlapping(other)
         return False
 
-    def check_consume(self):
+    def check_consume(self) -> None:
         global objects
         if self.consumer:
             for obj in Globals.all_drawable(agars_ = False):
                 if self.can_consume(obj):
                     self.consume(obj)
          
-    def consume(self, other):
+    def consume(self, other) -> None:
         self.mass += other.mass
         Globals.objects_to_delete.add(other.id)
         

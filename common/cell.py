@@ -133,7 +133,13 @@ class Cell(Drawable):
         self.move()
         self.check_colliding(Globals.cells)
         self.check_viruses(Globals.brown_viruses)
+        self.check_agars(Globals.agars)
 
+
+    def check_agars(self, agars) -> None:
+        for agar in agars:
+            if self.can_consume(agar):
+                self.consume(agar)
 
 
     def consume_virus(self, virus):
@@ -155,7 +161,6 @@ class Cell(Drawable):
                 if len(self.player.cells) < Globals.player_max_cells and cell.mass > Globals.player_split_min_mass:
                     cells_affected.append(cell.split(extra_speed = False))
                
-   
 
     def check_viruses(self, viruses):
         for virus in viruses:
@@ -164,7 +169,6 @@ class Cell(Drawable):
             elif virus.can_consume(self):
                 virus.consume(self)
             
-
        
     def eject_mass(self):
         e = Ejected(self)
@@ -174,46 +178,36 @@ class Cell(Drawable):
 
 
     def check_colliding(self, cells):
-
-       
         for other in self.player.cells:
-           
             if other.id != self.id:
-                sq_distance = ((other.x-self.x)**2+(other.y-self.y)**2)
-                if sq_distance < (other.radius+self.radius)**2:
+                if self.touching(other):
                     # If cells are too young, repel each other
                     if (time.time()-other.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4) or time.time()-self.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4)) and other.player == self.player:
-                        if time.time()-other.time_created > .2 and time.time()-self.time_created > .2:
-                            if self.touching(other):
-                                max_dist = self.radius + other.radius
-                                move_speed = 50
-                                xdiff = self.x-other.x
-                                ydiff = self.y-other.y
-                                angle = math.atan2(ydiff, xdiff)
-                                vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
-                                velocity = min(((max_dist)-self.distance_to(other)), move_speed*Globals.gamespeed) # cells will never become too far apart, and not too quickly
-                                combined_mass = self.mass+other.mass
+                        if time.time()-other.time_created > .2 and time.time()-self.time_created > .2: # "Buffer" so that cells don't instantly repel each other, makes splitting smoother
+                            max_dist = (self.radius + other.radius)-self.distance_to(other) # Ideal distance to move cells so they are touching each other but not overlapping (Don't want to repel more than this)
+                            move_speed = 50 # Maximum amount cells can repel each other in one game tick
+                            xdiff = self.x-other.x
+                            ydiff = self.y-other.y
 
-                                self.x += vector[0]*velocity*(other.mass/combined_mass)
-                                self.y += vector[1]*velocity*(other.mass/combined_mass)
-                                other.x -= vector[0]*velocity*(self.mass/combined_mass)
-                                other.y -= vector[1]*velocity*(self.mass/combined_mass)
-
-
-                                
+                            angle = math.atan2(ydiff, xdiff)
+                            vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
+                            velocity = min(max_dist, move_speed*Globals.gamespeed) # cells will never become too far apart, and not too quickly
+                            
+                            combined_mass = self.mass+other.mass
+                            self.x += vector[0]*velocity*(other.mass/combined_mass)
+                            self.y += vector[1]*velocity*(other.mass/combined_mass)
+                            other.x -= vector[0]*velocity*(self.mass/combined_mass)
+                            other.y -= vector[1]*velocity*(self.mass/combined_mass)
 
                     # If cells are old enough, recombine
                     else:
-                        if sq_distance < (self.radius-other.radius/3)**2:
+                        if self.overlapping(other):
                             if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
                                 self.consume(other)
 
         for other in cells:
             if other.player != self.player:
-                sq_distance = (other.x-self.x)**2+(other.y-self.y)**2
-                if sq_distance < (other.radius+self.radius)**2:
-                    if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
-                        if self.mass >= other.mass*1.3 and sq_distance < (self.radius-other.radius/3)**2:
-                                self.consume(other)
-                        elif other.mass >= self.mass*1.3 and sq_distance < (other.radius-self.radius/3)**2:
-                                other.consume(self)
+                if self.can_consume(other):
+                    self.consume(other)
+                elif other.can_consume(self):
+                    other.consume(self)

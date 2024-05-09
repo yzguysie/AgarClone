@@ -12,7 +12,7 @@ class Agar(Drawable):
 
 
     def tick(self):
-        self.check_colliding(Globals.cells)
+        #self.check_colliding(Globals.cells)
         self.x += self.xspeed
         self.y += self.yspeed
         self.xspeed /= 1+(12/Globals.tickrate)
