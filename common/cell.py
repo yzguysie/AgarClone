@@ -20,6 +20,7 @@ class Cell(Drawable):
         self.smoothradius = self.radius
         self.player = player
         self.target = player.target
+        self.elasticity = 0 # Proportion of momentum conserved after bouncing
 
 
         self.time_created = time.time()
@@ -42,47 +43,22 @@ class Cell(Drawable):
 
 
     def move(self):
+        # TODO - use drawable get_vector() method, but we need the velocity/distance, so wtf
         target_x, target_y = self.player.target
         xdiff = target_x-self.x
         ydiff = target_y-self.y
 
-        angle = math.atan2(ydiff, xdiff)
-        vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
-
+        # angle = math.atan2(ydiff, xdiff)
+        vector = self.get_vector(pos = self.player.target)
         velocity = min(self.slow_zone, math.sqrt(xdiff**2+ydiff**2))*10
 
-        #         x, y = pygame.mouse.get_pos()
-        #         xdiff = x-int(self.x/scale-camera_x+.5)
-        #         ydiff = y-int(self.y/scale-camera_y+.5)
-        #         angle = math.atan2(ydiff, xdiff)
-        #         vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
-        #         velocity = min(self.slow_zone, math.sqrt(xdiff**2+ydiff**2))
 
-
-
-
-        # if fps_ < fps/smooth_fix_limit or fps_ > fps*smooth_fix_limit:
-        #     self.xspeed = velocity*vector[0]*self.speed/fps*smooth_fix_limit
-        #     self.yspeed = velocity*vector[1]*self.speed/fps*smooth_fix_limit
-
-        # else:
-        #     self.xspeed = velocity*vector[0]*self.speed/fps_
-        #     self.yspeed = velocity*vector[1]*self.speed/fps_
-        self.xspeed = velocity*vector[0]*self.speed*Globals.gamespeed
-        self.yspeed = velocity*vector[1]*self.speed*Globals.gamespeed
+        self.xspeed = velocity*vector.x*self.speed*Globals.gamespeed
+        self.yspeed = velocity*vector.y*self.speed*Globals.gamespeed
 
         self.x += (self.xspeed+self.extraxspeed)/math.sqrt(self.radius)
         self.y += (self.yspeed+self.extrayspeed)/math.sqrt(self.radius)
 
-        if self.x > Globals.border_width:
-            self.x = Globals.border_width
-        if self.x < -Globals.border_width:
-            self.x = -Globals.border_width
-
-        if self.y > Globals.border_height:
-            self.y = Globals.border_height
-        if self.y < -Globals.border_height:
-            self.y = -Globals.border_height
 
         self.extraxspeed /= 1.05
         self.extrayspeed /= 1.05
@@ -90,13 +66,15 @@ class Cell(Drawable):
     def split(self, extra_speed = True):
         
         if len(self.player.cells) > Globals.player_max_cells or self.mass < Globals.player_split_min_mass:
-                return
+            return None
         
         self.mass /= 2
         new_cell = Cell(self.x, self.y+.1, self.mass, self.color, self.player)
-        new_cell.radius = self.radius # To make it look like the new cell is smoothly transitioning into being half the size
+        new_cell.smoothradius = self.smoothradius # To make it look like the new cell is smoothly transitioning into being half the size
         Globals.cells.append(new_cell)
         self.player.cells.append(new_cell)
+
+        #vector = self.get_vector((self.player.target[0], self.player.target[1]))
         
         if extra_speed:
             extrax = (self.xspeed)*Globals.gamespeed*100
@@ -131,6 +109,7 @@ class Cell(Drawable):
             else:
                 self.mass -= self.mass*Globals.player_decay_rate*Globals.gamespeed
         self.move()
+        self.check_borders()
         self.check_colliding(Globals.cells)
         self.check_viruses(Globals.brown_viruses)
         self.check_agars(Globals.agars)

@@ -244,7 +244,6 @@ s.listen()
 print("Waiting for a connection, Server Started")
 
 connected = []
-#changes = []
 
 changes_to_send: dict[int, ServerChanges] = {}
 last_change = None

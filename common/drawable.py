@@ -3,7 +3,7 @@ import math
 from common.globals import Globals
 
 class Drawable:
-    def __init__(self, x, y, mass, color):
+    def __init__(self, x : float, y : float, mass : float, color: tuple):
 
         self.x = x
         self.y = y
@@ -20,7 +20,7 @@ class Drawable:
         Globals.drawable_count += 1
         self.consumer = False
         self.consumable = True
-
+        self.elasticity = .5 # Proportion of momentum conserved after bouncing
 
     def draw(self, window, camera, aa=True, outline=True) -> None:
              
@@ -41,20 +41,55 @@ class Drawable:
 
 
     def tick(self) -> None:
+        self.move()
+        self.check_borders()
         self.check_consume()
+        
+
+    def move(self) -> None:
+        self.x += self.xspeed
+        self.y += self.yspeed
+        self.xspeed /= (1 + (12/Globals.tickrate))
+        self.yspeed /= (1 + (12/Globals.tickrate)) 
+
+    def check_borders(self) -> None:
+        if self.x > Globals.border_width:
+            self.x = Globals.border_width
+            self.xspeed *= -self.elasticity
+        if self.x < -Globals.border_width:
+            self.x = -Globals.border_width
+            self.xspeed *= -self.elasticity
+
+        if self.y > Globals.border_height:
+            self.y = Globals.border_height
+            self.yspeed *= -self.elasticity
+        if self.y < -Globals.border_height:
+            self.y = -Globals.border_height
+            self.yspeed *= -self.elasticity
+
+    def get_vector(self, pos: tuple = None, other: "Drawable" = None, normalize = True) -> pygame.math.Vector2:
+        if pos:
+            x, y = pos
+        elif other:
+            x, y = other.x, other.y
+        xdiff = x-self.x
+        ydiff = y-self.y
+        if normalize:
+            return pygame.math.Vector2(xdiff, ydiff).normalize()
+        return pygame.math.Vector2(xdiff, ydiff)
 
     def distance_to(self, other: "Drawable", squared = False) -> float:
         if squared:
             return (self.x-other.x)**2+(self.y-other.y)**2
         return math.sqrt((self.x-other.x)**2+(self.y-other.y)**2)
-
-    def touching(self, other) -> bool:
+    
+    def touching(self, other: "Drawable") -> bool:
         return math.pow((self.x-other.x), 2) + math.pow((self.y-other.y), 2) < math.pow((self.radius+other.radius), 2) 
     
-    def overlapping(self, other) -> bool:
+    def overlapping(self, other: "Drawable") -> bool:
         return math.pow(self.x-other.x, 2) + math.pow(self.y-other.y, 2) < math.pow(self.radius-other.radius/3, 2)
     
-    def can_consume(self, other) -> bool:
+    def can_consume(self, other: "Drawable") -> bool:
         if other.consumable and other.id != self.id:
             if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
                 return self.mass > other.mass*1.3 and self.overlapping(other)
@@ -66,8 +101,7 @@ class Drawable:
             for obj in Globals.all_drawable(agars_ = False):
                 if self.can_consume(obj):
                     self.consume(obj)
-         
-    def consume(self, other) -> None:
+
+    def consume(self, other: "Drawable") -> None:
         self.mass += other.mass
         Globals.objects_to_delete.add(other.id)
-        

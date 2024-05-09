@@ -10,10 +10,8 @@ class Virus(Drawable):
     def tick(self):
         self.check_colliding(Globals.cells)
         self.check_ejected(Globals.ejected)
-        self.x += self.xspeed
-        self.y += self.yspeed
-        self.xspeed /= (1 + (12/Globals.tickrate))
-        self.yspeed /= (1 + (12/Globals.tickrate))
+        self.move()
+        self.check_borders()
 
     def check_colliding(self, cells):
         for cell in cells:
