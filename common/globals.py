@@ -7,6 +7,7 @@ class Globals:
     dialogue_font = pygame.font.SysFont(font, font_width)
     drawable_count = 0
     objects_to_delete = set()
+    objects_added = set()
     camera = None
     agars = set()
     cells = []
@@ -16,6 +17,7 @@ class Globals:
     players = []
     smooth_fix_limit = 4
     config = ConfigParser()
+    frames = 0
 
     # parse existing file
     config.read('common/agar.ini')

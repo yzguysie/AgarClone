@@ -8,7 +8,7 @@ class Player:
         self.mode = mode
         self.color = color
         self.max_cells = 16
-        self.min_eject_mass = 43
+        self.min_eject_mass = Globals.player_eject_min_mass
         
         self.target = (0, 0)
         self.cells = []
@@ -17,9 +17,9 @@ class Player:
         for cell in self.cells:
             cell.tick()
 
-    def draw(self):
+    def draw(self, window, camera):
         for cell in self.cells:
-            cell.draw()
+            cell.draw(window, camera)
 
     def split(self):
         for i in range(len(self.cells)):
@@ -43,7 +43,7 @@ class Player:
                 weight += cell.mass
             return (center_x/weight, center_y/weight)
         except:
-            print("divide by 0")
+            # print("Error: Divide by 0 (Possible that client has no player)")
             return (10, 10)
                 
 
@@ -69,7 +69,7 @@ class Player:
     
     def get_nearest_obj(self, digga):
         center_x, center_y = self.calc_center_of_mass()
-        mindist = self.cells[0].radius*2
+        mindist = self.cells[0].radius*3
         found = False
         for obj in Globals.cells:
             if obj.player != self:
@@ -79,6 +79,17 @@ class Player:
                         mindist = dist
                         near = obj
                         found = True
+        if found:
+            return near
+        mindist = self.cells[0].radius*10
+        found = False
+        for obj in Globals.ejected:
+            if obj.mass*1.3 < self.cells[0].mass:
+                dist = math.sqrt((center_x-obj.x)**2+(center_y-obj.y)**2)
+                if dist < mindist:
+                    mindist = dist
+                    near = obj
+                    found = True
         if found:
             return near
         mindist = 2147483646

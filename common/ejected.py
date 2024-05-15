@@ -1,13 +1,13 @@
 
 from common.globals import Globals
-from common.drawable import Drawable
+from common.actor import Actor
 import math
 import pygame
 import time
 import random
-class Ejected(Drawable):
+class Ejected(Actor):
 
-    def __init__(self, cell: Drawable):
+    def __init__(self, cell: Actor):
         super().__init__(cell.x, cell.y, Globals.ejected_size, cell.color)
        
         x, y = cell.target
@@ -17,20 +17,14 @@ class Ejected(Drawable):
         self.vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
         self.x = self.x+(cell.radius)*self.vector.x
         self.y = self.y+(cell.radius)*self.vector.y
-        self.xspeed = self.vector.x*Globals.ejected_speed*60
-        self.yspeed = self.vector.y*Globals.ejected_speed*60
+        self.xspeed = self.vector.x*Globals.ejected_speed
+        self.yspeed = self.vector.y*Globals.ejected_speed
         self.time_created = time.time()
 
     def tick(self):
-        self.x += self.xspeed/Globals.tickrate
-        self.y += self.yspeed/Globals.tickrate
-
-        self.xspeed /= 1+(6/Globals.tickrate)
-        self.yspeed /= 1+(6/Globals.tickrate)
-
-
-        self.check_borders()
-
+        self.move()
+        if abs(self.xspeed)+abs(self.yspeed) > 0:
+            self.vector = pygame.math.Vector2(self.xspeed, self.yspeed).normalize()
 
         self.check_colliding(Globals.cells)
         self.check_brown(Globals.brown_viruses)
@@ -39,8 +33,8 @@ class Ejected(Drawable):
         for other in Globals.ejected:
             if other.id != self.id:
                 if self.touching(other):
-                    vector = self.get_vector(other = other)
-                    velocity = ((self.radius+other.radius)-self.distance_to(other))*Globals.gamespeed # So they wont repel too much (looks kind of like soft-body)
+                    vector = other.get_vector(other = self)
+                    velocity = ((self.radius+other.radius)-self.distance_to(other))*max(.5, Globals.gamespeed*5) # So they wont repel too much (looks kind of like soft-body)
                     self.x += vector.x*velocity/2
                     self.y += vector.y*velocity/2
                     other.x -= vector.x*velocity/2

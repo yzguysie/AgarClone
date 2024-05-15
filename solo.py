@@ -8,7 +8,7 @@ from common.player import Player
 from common.cell import Cell
 from common.agar import Agar
 from common.camera import Camera
-from common.drawable import Drawable
+from common.actor import Actor
 from common.globals import Globals
 from common.virus import Virus
 from common.brownvirus import BrownVirus
@@ -86,7 +86,7 @@ def calc_center_of_mass(bodies):
                 weight += body_.mass
             return (center_x/weight, center_y/weight)
         except:
-            print("divide by 0")
+            # print("Error: Divide by 0 (Possible that client has no player)")
             return (10, 10)
 
 def game_draw():
@@ -133,12 +133,14 @@ def game_tick():
     for thing in all_objs:
         if type(thing) != Cell:
             thing.tick()
+            thing.draw(window, Globals.camera)
 
     timer_start = time.time()
 
     for player_ in Globals.players:
         player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
+        player_.draw(window, Globals.camera)
 
     cell_time += time.time()-timer_start
 
@@ -240,8 +242,10 @@ minion_start_mass = config.getint('settings', 'minion_start_mass')
 
 
 
-width, height = 1280, 720
 
+width, height = 1280, 720
+window = pygame.display.set_mode([width, height])
+clock = pygame.time.Clock()
 #virus_image = pygame.image.load("resources/images/virus.png")
 
 aa_agar = True
@@ -252,7 +256,7 @@ font_color = Colors.green
 
 
 
-Globals.camera = Camera()
+Globals.camera = Camera(window)
 Globals.camera.x = 0
 Globals.camera.y = 0
 target_scale = 105
@@ -278,8 +282,7 @@ smoothness = 15
 
 smooth_fix_limit = 4
 
-window = pygame.display.set_mode([width, height])
-clock = pygame.time.Clock()
+
 
 player = Player("player", Colors.blue)
 Globals.players.append(player)
