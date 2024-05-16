@@ -32,7 +32,7 @@ class Cell(Actor):
         dialogue_font = pygame.font.SysFont(Globals.font, player_font_width)
         
         # Draw Player Name
-        dialogue = dialogue_font.render(self.player.mode, True, (255, 255, 255))
+        dialogue = dialogue_font.render(self.player.name, True, (255, 255, 255))
         dialogue_rect = dialogue.get_rect(center = (camera.get_screen_x(self.x), camera.get_screen_y(self.y)))
         window.blit(dialogue, dialogue_rect)
 

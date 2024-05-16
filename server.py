@@ -20,6 +20,7 @@ from common.cell import Cell
 from common.agar import Agar
 from common.camera import Camera
 #from common.drawable import Drawable
+from common.player import Player
 from common.globals import Globals
 from common.virus import Virus
 from common.brownvirus import BrownVirus
@@ -108,6 +109,7 @@ def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_
         for cell in Globals.cells:
             yield cell
 
+
 def all_consumable():
     for e in Globals.ejected:
         yield e
@@ -142,20 +144,40 @@ def create_new_object(obj: str):
         Globals.brown_viruses.append(new_brown_virus)
         Globals.objects_added.add(new_brown_virus)
 
-def display_metrics(window, distance: int, aa_text: bool = True):
+def display_metrics(window, spacing: int, aa_text: bool = True):
     font_color = Colors.green
     dialogue = Globals.dialogue_font.render("Fps: " + str(Globals.fps_), aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    # dialogue = Globals.dialogue_font.render("Mass: " + str(int(total_mass+.5)), aa_text, font_color)
-    # window.blit(dialogue, (0, distance*2))
+    dialogue = Globals.dialogue_font.render("Mass: " + str(int(player.mass()+.5)), aa_text, font_color)
+    window.blit(dialogue, (0, spacing*3))
     dialogue = Globals.dialogue_font.render("Players: " + str(len(Globals.players)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*4))
+    window.blit(dialogue, (0, spacing*4))
     dialogue = Globals.dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*5))
+    window.blit(dialogue, (0, spacing*5))
     dialogue = Globals.dialogue_font.render("Agars: " + str(len(Globals.agars)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*6))
+    window.blit(dialogue, (0, spacing*6))
     dialogue = Globals.dialogue_font.render("Ejected: " + str(len(Globals.ejected)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*7))
+    window.blit(dialogue, (0, spacing*7))
+    display_leaderboard(window, 10, spacing)
+
+def display_leaderboard(window, size: int, spacing: int, aa_text: bool = True) -> None:
+    screen_width, screen_height = window.get_size()
+    font_color = Colors.green
+    leaderboard = get_leaderboard(size)
+    dialogue = Globals.dialogue_font.render('Leaderboard', aa_text, font_color)
+    window.blit(dialogue, (screen_width-screen_width/10, screen_height/20)) 
+    for i in range(len(leaderboard)):
+        name = leaderboard[i]
+        dialogue = Globals.dialogue_font.render(f'{i+1}. {name}', aa_text, font_color)
+        window.blit(dialogue, (screen_width-screen_width/10, spacing*(i+1)+screen_height/20)) 
+
+def get_leaderboard(size: int) -> list:
+    leaderboard = []
+    Globals.players.sort(key=lambda x: x.mass(), reverse=True)
+    for player in Globals.players:
+        if len(leaderboard) < size:
+            leaderboard.append(player.name)
+    return leaderboard
 
 def threaded_client(conn, player_id):
     #global changes
@@ -164,7 +186,7 @@ def threaded_client(conn, player_id):
     changes_to_send[player_id] = None # FIXME Could cause last change to be doubled on client (Idk bruh fml)
 
 
-    new_player = Player("player", get_random_color())
+    new_player = Player("player", f"player {player_id}", get_random_color())
     Globals.players.append(new_player)
     info.player = new_player
     conn.send(pickle.dumps(info))
@@ -241,9 +263,9 @@ def main():
 
     Globals.players.append(player)
     for i in range(Globals.bot_count):
-        Globals.players.append(Player("bot", Colors.red))
+        Globals.players.append(Player("bot", f"bot {i+1}", Colors.red))
     for i in range(Globals.minion_count):
-        Globals.players.append(Player("minion", Colors.green))
+        Globals.players.append(Player("minion", f"minion {i+1}", Colors.green))
 
     player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
 
@@ -251,8 +273,8 @@ def main():
 
     last_time = time.time()
 
-    for _ in range(int(Globals.max_agars/2)):
-        create_new_object("agar")
+    # for _ in range(int(Globals.max_agars/2)):
+    #     create_new_object("agar")
 
     for _ in range(int(Globals.virus_count)):
         create_new_object("virus")
@@ -282,9 +304,13 @@ def main():
     #handle_connections(1, 2)
     start_new_thread(handle_connections, ())
     #global changes, screen_height, last_change
-    frames = 0
+    Globals.frames = 0
     playing = True
     while playing:
+        slots = Globals.max_agars - len(Globals.agars)
+        spawn_rate = 10
+        placeholder = int(max(1, len(Globals.agars)/max(slots, 1)*Globals.tickrate/spawn_rate))
+
         #changes.objects_added = set()
         start = time.time()
 
@@ -319,7 +345,7 @@ def main():
             create_new_object("brown virus")
     
         if len(Globals.agars) < Globals.max_agars:
-            if frames%int(len(Globals.agars)/25000/Globals.gamespeed+1) == 0:
+            if Globals.frames % placeholder == 0:
                 create_new_object("agar")
 
         target_scale = 0
@@ -358,6 +384,8 @@ def main():
 
             if event.type == pygame.VIDEORESIZE:
                 screen_width, screen_height = window.get_size()
+                Globals.font_width = int(screen_width/100+1)
+                Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -397,7 +425,7 @@ def main():
         game_tick()
         game_draw(window, player)
 
-        display_metrics(window, 25)
+        display_metrics(window, screen_width/80)
         
         Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
         Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
@@ -446,7 +474,7 @@ def main():
 connected = []
 changes_to_send: dict[int, ServerChanges] = {}
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-player = Player("player", get_random_color())
+player = Player("player", "Server", get_random_color())
 info = ServerInfo()
 #changes = ServerChanges()
 #cProfile.run('main()', sort='cumtime')

@@ -91,19 +91,39 @@ def all_consumable():
     for cell in Globals.cells:
          yield cell
 
-def display_metrics(distance, aa_text = True):
+def display_metrics(spacing, aa_text = True):
     dialogue = Globals.dialogue_font.render("Fps: " + str(Globals.fps_), aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    # dialogue = Globals.dialogue_font.render("Mass: " + str(int(total_mass+.5)), aa_text, font_color)
-    # window.blit(dialogue, (0, distance*2))
+    dialogue = Globals.dialogue_font.render("Mass: " + str(int(player.mass()+.5)), aa_text, font_color)
+    window.blit(dialogue, (0, spacing*2))
     dialogue = Globals.dialogue_font.render("Players: " + str(len(Globals.players)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*4))
+    window.blit(dialogue, (0, spacing*4))
     dialogue = Globals.dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*5))
+    window.blit(dialogue, (0, spacing*5))
     dialogue = Globals.dialogue_font.render("Agars: " + str(len(Globals.agars)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*6))
+    window.blit(dialogue, (0, spacing*6))
     dialogue = Globals.dialogue_font.render("Ejected: " + str(len(Globals.ejected)), aa_text, font_color)
-    window.blit(dialogue, (0, distance*7))
+    window.blit(dialogue, (0, spacing*7))
+    display_leaderboard(window, 10, spacing)
+
+def display_leaderboard(window, size: int, spacing: int, aa_text: bool = True) -> None:
+    screen_width, screen_height = window.get_size()
+    font_color = Colors.green
+    leaderboard = get_leaderboard(size)
+    dialogue = Globals.dialogue_font.render('Leaderboard', aa_text, font_color)
+    window.blit(dialogue, (screen_width-screen_width/10, screen_height/20)) 
+    for i in range(len(leaderboard)):
+        name = leaderboard[i]
+        dialogue = Globals.dialogue_font.render(f'{i+1}. {name}', aa_text, font_color)
+        window.blit(dialogue, (screen_width-screen_width/10, spacing*(i+1)+screen_height/20)) 
+
+def get_leaderboard(size: int) -> list:
+    leaderboard = []
+    Globals.players.sort(key=lambda x: x.mass(), reverse=True)
+    for player in Globals.players:
+        if len(leaderboard) < size:
+            leaderboard.append(player.name)
+    return leaderboard
 
 def update(change):
     count = 0
@@ -202,6 +222,8 @@ def main():
             
             if event.type == pygame.VIDEORESIZE:
                 screen_width, screen_height = window.get_size()
+                Globals.font_width = int(screen_width/100+1)
+                Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
@@ -233,7 +255,7 @@ def main():
         game_draw()
 
 
-        display_metrics(25)
+        display_metrics(screen_width/80)
 
         pygame.display.flip()
 
@@ -329,7 +351,7 @@ font = 'arial'
 font_width = int(screen_width/100+1)
 dialogue_font = pygame.font.SysFont(font, font_width)
 
-player = Player("player", Colors.blue)
+player = Player("player", "Error", Colors.blue)
 Globals.players.append(player)
 
 player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]

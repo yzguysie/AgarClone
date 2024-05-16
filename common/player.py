@@ -2,10 +2,11 @@ import pygame
 from common.globals import Globals
 import math
 class Player:
-    def __init__(self, mode, color):
+    def __init__(self, mode: str, name: str, color: tuple [int, int, int]):
         self.id = Globals.drawable_count
         Globals.drawable_count += 1
         self.mode = mode
+        self.name = name
         self.color = color
         self.max_cells = 16
         self.min_eject_mass = Globals.player_eject_min_mass
@@ -31,6 +32,11 @@ class Player:
         for cell in self.cells:
             if cell.mass > self.min_eject_mass:
                 cell.eject_mass()
+
+    def mass(self) -> float:
+        cells = [cell for cell in self.cells if cell.id not in Globals.objects_to_delete]
+        return sum(cell.mass for cell in self.cells)
+            
 
     def calc_center_of_mass(self):
         try:
