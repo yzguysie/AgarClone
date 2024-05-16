@@ -5,7 +5,8 @@ import random
 class Agar(Actor):
 
     def draw(self, window, camera):
-        super().draw(window, camera, aa=False, outline=False)
+        super().draw(window, camera, aa=True, outline=False)
+
     def tick(self):
         self.move()        
         if Globals.agar_grow:

@@ -45,8 +45,8 @@ def game_draw(window, player):
     target_camera_x, target_camera_y = player.calc_center_of_mass()
     Globals.camera.set_pos(target_camera_x, target_camera_y)
     Globals.camera.tick()
-    all_objs = list(all_drawable())
-    all_objs.sort(key=lambda x: x.radius)
+    all_objs = [obj for obj in all_drawable() if Globals.camera.on_screen(obj)]
+    all_objs.sort(key=lambda x: x.smoothradius)
     for obj in all_objs:
         obj.draw(window, Globals.camera)
 
@@ -432,13 +432,7 @@ def main():
         Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
         Globals.viruses = [virus for virus in Globals.viruses if virus.id not in Globals.objects_to_delete]
         Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
-        for cell in Globals.cells:
-            if cell.mass > Globals.player_max_cell_mass:
-                cell.split()
-        # for i in range(len(Globals.players)):
-        #     thing = player.cells
-        #     if len(thing) < 1:
-        #          Globals.cells.append(Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, Colors.red, Globals.players[i]))
+        
         for p in Globals.players:
             p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
 

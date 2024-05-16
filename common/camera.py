@@ -35,7 +35,12 @@ class Camera:
         return round(x/self.scale-self.x), round(y/self.scale-self.y)
     
     def on_screen(self, obj: Actor):
-        raise NotImplementedError
+        screen_width, screen_height = self.window.get_size()
+        obj_size = obj.radius/self.scale
+        on_x = self.get_screen_x(obj.x) > -obj_size and self.get_screen_x(obj.x) - obj_size < screen_width
+        on_y = self.get_screen_y(obj.y) > -obj_size and self.get_screen_y(obj.y) - obj_size < screen_height
+        return on_x and on_y
+        
 
     def get_x(self, x):
         return (x-self.width/2)*self.scale+self.x

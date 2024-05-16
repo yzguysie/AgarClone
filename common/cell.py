@@ -87,6 +87,8 @@ class Cell(Actor):
     def tick(self) -> None:
         if self.mass > Globals.player_min_mass:
             self.decay(Globals.player_decay_rate)
+        if self.mass > Globals.player_max_cell_mass:
+            self.split()
         self.move()
         self.check_colliding(Globals.cells)
         self.check_viruses(Globals.brown_viruses)
@@ -101,7 +103,7 @@ class Cell(Actor):
             if self.can_consume(agar):
                 self.consume(agar)
 
-    def consume_virus(self, virus) -> None:
+    def consume_virus(self, virus: Actor) -> None:
         self.mass += virus.mass
         Globals.objects_to_delete.add(virus.id)
         cells_affected = [self]
@@ -110,14 +112,14 @@ class Cell(Actor):
                 if len(self.player.cells) < Globals.player_max_cells and cell.mass > Globals.player_split_min_mass:
                     cells_affected.append(cell.split(extra_speed = False))
 
-    def consume_brown_virus(self, virus) -> None:
-        self.mass += virus.mass
-        Globals.objects_to_delete.add(virus.id)
-        cells_affected = [self]
-        for _ in range(16):
-            for cell in cells_affected:
-                if len(self.player.cells) < Globals.player_max_cells and cell.mass > Globals.player_split_min_mass:
-                    cells_affected.append(cell.split(extra_speed = False))
+    # def consume_brown_virus(self, virus: Actor) -> None:
+    #     self.mass += virus.mass
+    #     Globals.objects_to_delete.add(virus.id)
+    #     cells_affected = [self]
+    #     for _ in range(16):
+    #         for cell in cells_affected:
+    #             if len(self.player.cells) < Globals.player_max_cells and cell.mass > Globals.player_split_min_mass:
+    #                 cells_affected.append(cell.split(extra_speed = False))
 
     def check_viruses(self, viruses) -> None:
         for virus in viruses:
