@@ -91,18 +91,19 @@ def all_consumable():
     for cell in Globals.cells:
          yield cell
 
-def display_metrics(spacing, aa_text = True):
-    dialogue = Globals.dialogue_font.render("Fps: " + str(Globals.fps_), aa_text, font_color)
+def display_metrics(window, spacing: int, aa_text: bool = True):
+    font_color = Colors.green
+    dialogue = Globals.dialogue_font.render(f"Fps: {Globals.fps_}", aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    dialogue = Globals.dialogue_font.render("Mass: " + str(int(player.mass()+.5)), aa_text, font_color)
-    window.blit(dialogue, (0, spacing*2))
-    dialogue = Globals.dialogue_font.render("Players: " + str(len(Globals.players)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Mass: {round(player.mass())}", aa_text, font_color)
+    window.blit(dialogue, (0, spacing*3))
+    dialogue = Globals.dialogue_font.render(f"Players:  {len(Globals.players)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*4))
-    dialogue = Globals.dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Cells: {len(Globals.cells)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*5))
-    dialogue = Globals.dialogue_font.render("Agars: " + str(len(Globals.agars)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Agars: {len(Globals.agars)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*6))
-    dialogue = Globals.dialogue_font.render("Ejected: " + str(len(Globals.ejected)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Ejected: {len(Globals.ejected)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*7))
     display_leaderboard(window, 10, spacing)
 
@@ -137,7 +138,7 @@ def update(change):
         Globals.cells = change.cells
         Globals.ejected = change.ejected
         count += 1
-        print("ok" + str(count))
+        #print(f"Change {count}")
         change = change.next_batch
 
 

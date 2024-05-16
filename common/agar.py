@@ -5,7 +5,7 @@ import random
 class Agar(Actor):
 
     def draw(self, window, camera):
-        super().draw(window, camera, aa=True, outline=False)
+        super().draw(window, camera, aa=True, outline=True)
 
     def tick(self):
         self.move()        

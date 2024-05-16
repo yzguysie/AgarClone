@@ -21,6 +21,9 @@ class Ejected(Actor):
         self.yspeed = self.vector.y*Globals.ejected_speed
         self.time_created = time.time()
 
+    # def draw(self, window, camera):
+    #     super().draw(window, camera, sides=10)
+
     def tick(self):
         self.move()
         if abs(self.xspeed)+abs(self.yspeed) > 0:

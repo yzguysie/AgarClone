@@ -22,22 +22,55 @@ class Actor:
         self.elasticity = .5 # Proportion of momentum conserved after bouncing
     
 
-    def draw(self, window, camera, aa=True, outline=True) -> None:
-             
+    def draw(self, window, camera, aa=True, outline=True, sides: int = None) -> None:
         self.radius = math.sqrt(self.mass)
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
-        self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
+        if not sides:
 
-        #Draw Outline
-        if self.outline_thickness > 0 and outline:
+            #self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
+
+            #Draw Outline
+            if self.outline_thickness > 0 and outline:
+                if aa:
+                    pygame.gfxdraw.aacircle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
+                pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
+            
+            #Draw Inside
             if aa:
-                pygame.gfxdraw.aacircle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
-            pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale)), self.outline_color)
-        
-        #Draw Inside
-        if aa:
-            pygame.gfxdraw.aacircle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
-        pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
+                pygame.gfxdraw.aacircle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
+            pygame.gfxdraw.filled_circle(window, camera.get_screen_x(self.x), camera.get_screen_y(self.y), round(abs(self.smoothradius/Globals.camera.scale-self.outline_thickness)), self.color)
+        else:
+            if sides < 3:
+                raise Exception("Must be more than 2 sides in a polygon")
+            points = []
+            angle = -math.pi/sides
+
+            x = camera.get_screen_x(self.x)
+            y = camera.get_screen_y(self.y)
+            if self.outline_thickness > 0 and outline:
+                radius = self.radius/camera.scale
+                for _ in range(sides):
+                    angle += math.pi*2/sides
+                    vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
+                    points.append((x+vector.x*radius, y+vector.y*radius))
+
+                if aa:
+                    pygame.gfxdraw.aapolygon(window, points, self.outline_color)
+                pygame.gfxdraw.filled_polygon(window, points, self.outline_color)
+
+            points = []
+            angle = -math.pi/sides
+            radius = self.radius/camera.scale-self.outline_thickness
+            for _ in range(sides):
+                angle += math.pi*2/sides
+                vector = pygame.math.Vector2(math.cos(angle), math.sin(angle))
+                points.append((x+vector.x*radius, y+vector.y*radius))
+
+            if aa:
+                pygame.gfxdraw.aapolygon(window, points, self.color)
+            pygame.gfxdraw.filled_polygon(window, points, self.color)
+
+
 
 
     def tick(self) -> None:

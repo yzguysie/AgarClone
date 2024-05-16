@@ -45,6 +45,8 @@ def game_draw(window, player):
     target_camera_x, target_camera_y = player.calc_center_of_mass()
     Globals.camera.set_pos(target_camera_x, target_camera_y)
     Globals.camera.tick()
+    for obj in all_drawable():
+        obj.smoothradius += (obj.radius - obj.smoothradius)/max(Globals.fps_*obj.smoothness, 1)
     all_objs = [obj for obj in all_drawable() if Globals.camera.on_screen(obj)]
     all_objs.sort(key=lambda x: x.smoothradius)
     for obj in all_objs:
@@ -79,18 +81,13 @@ def game_tick():
         player_.tick()
 
 
-    info.players = (Globals.players)
-    info.cells = (Globals.cells)
-    info.agars = (Globals.agars)    
-    info.viruses = (Globals.viruses)
-    info.brown_viruses = (Globals.brown_viruses)
-    info.ejected = (Globals.ejected)
-    # info.players = copy.deepcopy(Globals.players)
-    # info.cells = copy.deepcopy(Globals.cells)
-    # info.agars = copy.deepcopy(Globals.agars)    
-    # info.viruses = copy.deepcopy(Globals.viruses)
-    # info.brown_viruses = copy.deepcopy(Globals.brown_viruses)
-    # info.ejected = copy.deepcopy(Globals.ejected)
+    info.players = Globals.players
+    info.cells = Globals.cells
+    info.agars = Globals.agars 
+    info.viruses = Globals.viruses
+    info.brown_viruses = Globals.brown_viruses
+    info.ejected = Globals.ejected
+
 
 def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True):
     if agars_:
@@ -146,17 +143,17 @@ def create_new_object(obj: str):
 
 def display_metrics(window, spacing: int, aa_text: bool = True):
     font_color = Colors.green
-    dialogue = Globals.dialogue_font.render("Fps: " + str(Globals.fps_), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Fps: {Globals.fps_}", aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    dialogue = Globals.dialogue_font.render("Mass: " + str(int(player.mass()+.5)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Mass: {round(player.mass())}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*3))
-    dialogue = Globals.dialogue_font.render("Players: " + str(len(Globals.players)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Players:  {len(Globals.players)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*4))
-    dialogue = Globals.dialogue_font.render("Cells: " + str(len(Globals.cells)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Cells: {len(Globals.cells)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*5))
-    dialogue = Globals.dialogue_font.render("Agars: " + str(len(Globals.agars)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Agars: {len(Globals.agars)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*6))
-    dialogue = Globals.dialogue_font.render("Ejected: " + str(len(Globals.ejected)), aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Ejected: {len(Globals.ejected)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*7))
     display_leaderboard(window, 10, spacing)
 
@@ -219,6 +216,8 @@ def threaded_client(conn, player_id):
     Globals.players.remove(new_player)
     del changes_to_send[player_id]
     return
+
+
 
 def handle_connections():
     global s
@@ -354,10 +353,10 @@ def main():
         
 
         target_scale/= max(len(player.cells)**(1/1.5), 1)
+        target_scale = target_scale*720/screen_height
 
-        Globals.camera.set_scale(target_scale*720/screen_height)
+        Globals.camera.set_scale(target_scale)
 
-        total_mass = sum(cell.mass for cell in player.cells)
 
         #Bot AI Target finding
         # for thing in players:
@@ -386,6 +385,7 @@ def main():
                 screen_width, screen_height = window.get_size()
                 Globals.font_width = int(screen_width/100+1)
                 Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
+                Globals.camera.scale = target_scale
 
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
