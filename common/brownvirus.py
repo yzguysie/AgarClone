@@ -41,6 +41,7 @@ class BrownVirus(Actor):
         spatted.xspeed = vector[0]*spit_speed
         spatted.yspeed = vector[1]*spit_speed
         Globals.agars.add(spatted)
+        Globals.objects_added.add(spatted)
         self.mass -= spatted.mass/spit_mult
         self.mass = max(self.mass, self.startmass)
 

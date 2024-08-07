@@ -93,6 +93,7 @@ class Cell(Actor):
         self.check_colliding(Globals.cells)
         self.check_viruses(Globals.brown_viruses)
         self.check_agars(Globals.agars)
+        self.update_radius()
        
     def decay(self, rate) -> None:
         self.mass -= self.mass*rate*Globals.gamespeed
@@ -133,7 +134,7 @@ class Cell(Actor):
         self.mass -= Globals.ejected_loss
         self.radius = math.sqrt(self.mass)
         Globals.ejected.append(e)
-
+        
     def check_colliding(self, cells: list["Cell"]):
         for other in self.player.cells:
             if other.id != self.id:

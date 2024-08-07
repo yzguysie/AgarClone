@@ -4,7 +4,7 @@ import math
 import random
 import time
 import socket
-#import threading
+import threading
 from _thread import *
 import sys
 # from configparser import ConfigParser
@@ -130,7 +130,7 @@ def create_new_object(obj: str):
             new_virus = Virus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.virus_mass, Colors.green)
             count += 1
         Globals.viruses.append(new_virus)
-        Globals.objects_added.add(new_virus)
+        #Globals.objects_added.add(new_virus)
     
     if obj == "brown virus":
         new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
@@ -139,7 +139,7 @@ def create_new_object(obj: str):
             new_brown_virus = BrownVirus(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.brown_virus_mass, Colors.brown)
             count += 1
         Globals.brown_viruses.append(new_brown_virus)
-        Globals.objects_added.add(new_brown_virus)
+        #Globals.objects_added.add(new_brown_virus)
 
 def display_metrics(window, spacing: int, aa_text: bool = True):
     font_color = Colors.green
@@ -205,8 +205,12 @@ def threaded_client(conn, player_id):
                             p.split()
                         if cl_data.eject:
                             p.eject_mass()
-                conn.send(pickle.dumps((changes_to_send[player_id])))
-                changes_to_send[player_id] = None
+                #time.sleep(.05)
+                with lock:
+                    bytes_to_send = pickle.dumps((changes_to_send[player_id]))
+                    changes_to_send[player_id] = None
+                conn.send(bytes_to_send)
+                
         except:
             break
 
@@ -440,22 +444,27 @@ def main():
 
         current_changes.objects_deleted = Globals.objects_to_delete
         current_changes.objects_added = Globals.objects_added
+        Globals.objects_to_delete = set()
+        Globals.objects_added = set()
+
+
         # current_changes.cells = copy.deepcopy(Globals.cells)
         # current_changes.players = copy.deepcopy(Globals.players) -> We only need the most recent copies anyway
         # current_changes.ejected = copy.deepcopy(Globals.ejected)
         current_changes.cells = Globals.cells
         current_changes.players = Globals.players
         current_changes.ejected = Globals.ejected
+        current_changes.viruses = Globals.viruses
+        current_changes.brown_viruses = Globals.brown_viruses
         if last_change:
             last_change.next_batch = current_changes
         last_change = current_changes
         #changes = current_changes
-        for p in changes_to_send:
-            if not changes_to_send[p]:
-                changes_to_send[p] = last_change # FIXME Here is the issue: I think when you make changes to send for a player a reference to last_change, when last_change is reassigned so is the player's changes. If you make a copy, the next batch will never be made
-        
-        Globals.objects_to_delete = set()
-        Globals.objects_added = set()
+        with lock:
+            for p in changes_to_send:
+                if not changes_to_send[p]:
+                    changes_to_send[p] = last_change # FIXME Here is the issue: I think when you make changes to send for a player a reference to last_change, when last_change is reassigned so is the player's changes. If you make a copy, the next batch will never be made
+
  
         clock.tick(Globals.tickrate)
         pygame.display.flip()
@@ -464,6 +473,7 @@ def main():
         Globals.fps_ = round(1/(time.time()-start))
         Globals.gamespeed = min(1/Globals.fps_, 1/Globals.tickrate*Globals.smooth_fix_limit)
         
+lock = threading.Lock()
 
 connected = []
 changes_to_send: dict[int, ServerChanges] = {}

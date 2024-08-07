@@ -6,4 +6,6 @@ class ServerChanges:
         self.players = []
         self.cells = []
         self.ejected = []
+        self.viruses = []
+        self.brown_viruses = []
         self.next_batch: "ServerChanges" = None

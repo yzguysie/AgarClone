@@ -11,7 +11,7 @@ class Agar(Actor):
         self.move()        
         if Globals.agar_grow:
             self.grow()
-
+            
     def grow(self):
         if self.mass < Globals.agar_max_mass and random.randint(0, round(Globals.tickrate/Globals.agar_grow_speed)) == 1:
             self.mass += 1

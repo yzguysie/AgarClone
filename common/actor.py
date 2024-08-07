@@ -21,6 +21,9 @@ class Actor:
         self.consumable = True
         self.elasticity = .5 # Proportion of momentum conserved after bouncing
     
+    def update_radius(self):
+        self.radius = math.sqrt(self.mass)
+
 
     def draw(self, window, camera, aa=True, outline=True, sides: int = None) -> None:
         self.radius = math.sqrt(self.mass)
@@ -28,6 +31,7 @@ class Actor:
         if not sides:
 
             #self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
+            self.smoothradius = self.radius #FIXME only because server bugs smoothradius
 
             #Draw Outline
             if self.outline_thickness > 0 and outline:
@@ -74,7 +78,8 @@ class Actor:
 
 
     def tick(self) -> None:
-        self.move()        
+        self.move()
+        self.update_radius()        
 
     def move(self) -> None:
 

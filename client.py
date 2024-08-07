@@ -52,10 +52,10 @@ def game_draw():
     for obj in all_objs:
         obj.draw(window, Globals.camera)
 
-def interpolate():
+def interpolate(dt):
 
-    Globals.tickrate = 1/delta_time
-    Globals.gamespeed = delta_time
+    Globals.tickrate = 1/dt
+    Globals.gamespeed = dt
 
     all_objs = list(all_drawable(agars_ = False, ejected_ = True, viruses_ = False, brown_viruses_ = False, cells_ = True))
     for thing in all_objs:
@@ -126,17 +126,21 @@ def get_leaderboard(size: int) -> list:
             leaderboard.append(player.name)
     return leaderboard
 
-def update(change):
+def update(change: ServerChanges):
     count = 0
 
     if change == None:
+        #print("No Changes")
         return 0
+    
     
     while change != None:
         one_update(change)
         Globals.players = change.players
         Globals.cells = change.cells
         Globals.ejected = change.ejected
+        Globals.viruses = change.viruses
+        Globals.brown_viruses = change.brown_viruses
         count += 1
         #print(f"Change {count}")
         change = change.next_batch
@@ -158,31 +162,33 @@ def one_update(update: ServerChanges):
     for obj in update.objects_added:
         if type(obj) == Agar:
             Globals.agars.add(obj)
-        elif type(obj) == Virus:
-            Globals.viruses.append(obj)
-        elif type(obj) == BrownVirus:
-            Globals.brown_viruses.append(obj)
+        # elif type(obj) == Virus:
+        #     Globals.viruses.append(obj)
+        # elif type(obj) == BrownVirus:
+        #     Globals.brown_viruses.append(obj)
     Globals.agars = set([agar for agar in Globals.agars if agar.id not in update.objects_deleted])
-    Globals.viruses = [virus for virus in Globals.viruses if virus.id not in update.objects_deleted]
-    Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in update.objects_deleted]
+    # Globals.viruses = [virus for virus in Globals.viruses if virus.id not in update.objects_deleted]
+    # Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in update.objects_deleted
 
 def threaded_update():
-    global new_info
+    global new_info, last_update
     while True:
         try:
             if new_info:
-                changes = n.send(info)
+                changes: ServerChanges = n.send(info)
                 with lock:
                     update(changes)
                     new_info = False
                     info.split = False
                     info.eject = False
+                    last_update = time.time()
         except Exception as e: 
             print(e)
             return
-    
+        
+last_update = time.time()
 def main():
-    global new_info, player 
+    global new_info, player, screen_width, last_update
     frames = 0
     playing = True
     aa_text = True
@@ -192,10 +198,11 @@ def main():
         #cProfile.run('game_tick()', sort='cumtime')
 
         Globals.cells.sort(key=lambda x: x.mass, reverse=False)   
-
-        if new_info:
+        dt = time.time()-last_update
+        if dt > .001:
             with lock:
-                interpolate()
+                interpolate(time.time()-last_update)
+                last_update = time.time()
         new_info = True
 
         for p in Globals.players:
@@ -204,6 +211,7 @@ def main():
 
         target_scale = 0
         for thing in player.cells:
+            thing.update_radius()
             target_scale += thing.radius**(1/4)/10
         target_scale/= max(len(player.cells)**(1/1.5), 1)
         Globals.camera.set_scale(max(target_scale, .1))
@@ -251,12 +259,12 @@ def main():
         if pygame.key.get_pressed()[pygame.K_z]:
             info.split = True
                     
+        with lock:
+            game_tick()
+            game_draw()
 
-        game_tick()
-        game_draw()
 
-
-        display_metrics(screen_width/80)
+        display_metrics(window, screen_width/80)
 
         pygame.display.flip()
 
