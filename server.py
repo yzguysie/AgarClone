@@ -1,5 +1,5 @@
 import pygame
-import pygame.gfxdraw
+# import pygame.gfxdraw
 import math
 import random
 import time
@@ -18,7 +18,6 @@ import pickle
 from common.player import Player
 from common.cell import Cell
 from common.agar import Agar
-from common.camera import Camera
 #from common.drawable import Drawable
 from common.player import Player
 from common.globals import Globals
@@ -41,16 +40,6 @@ def get_random_color():
     colors = [Colors.red, Colors.dark_red, Colors.pink, Colors.orange, Colors.yellow, Colors.dark_green, Colors.green, Colors.purple, Colors.blue, Colors.light_blue, Colors.cyan, Colors.good_color, ]
     return colors[random.randint(0, len(colors)-1)]
 
-def game_draw(window, player):
-    target_camera_x, target_camera_y = player.calc_center_of_mass()
-    Globals.camera.set_pos(target_camera_x, target_camera_y)
-    Globals.camera.tick()
-    for obj in all_drawable():
-        obj.smoothradius += (obj.radius - obj.smoothradius)/max(Globals.fps_*obj.smoothness, 1)
-    all_objs = [obj for obj in all_drawable() if Globals.camera.on_screen(obj)]
-    all_objs.sort(key=lambda x: x.smoothradius)
-    for obj in all_objs:
-        obj.draw(window, Globals.camera)
 
 def game_tick():
     global info
@@ -74,7 +63,7 @@ def game_tick():
     for thing in all_objs:
         thing.tick()
 
-    player.update_target(Globals.camera, Globals.agars) # Server player has to update, clients do elsewhere
+    #player.update_target(Globals.camera, Globals.agars) # Server player has to update, clients do elsewhere
     for player_ in Globals.players:
         if player_.mode != "player":
             player_.update_target(Globals.camera, Globals.agars)
@@ -141,40 +130,25 @@ def create_new_object(obj: str):
         Globals.brown_viruses.append(new_brown_virus)
         #Globals.objects_added.add(new_brown_virus)
 
-def display_metrics(window, spacing: int, aa_text: bool = True):
-    font_color = Colors.green
-    dialogue = Globals.dialogue_font.render(f"Fps: {Globals.fps_}", aa_text, font_color)
-    window.blit(dialogue, (0, 0))
-    dialogue = Globals.dialogue_font.render(f"Mass: {round(player.mass())}", aa_text, font_color)
-    window.blit(dialogue, (0, spacing*3))
-    dialogue = Globals.dialogue_font.render(f"Players:  {len(Globals.players)}", aa_text, font_color)
-    window.blit(dialogue, (0, spacing*4))
-    dialogue = Globals.dialogue_font.render(f"Cells: {len(Globals.cells)}", aa_text, font_color)
-    window.blit(dialogue, (0, spacing*5))
-    dialogue = Globals.dialogue_font.render(f"Agars: {len(Globals.agars)}", aa_text, font_color)
-    window.blit(dialogue, (0, spacing*6))
-    dialogue = Globals.dialogue_font.render(f"Ejected: {len(Globals.ejected)}", aa_text, font_color)
-    window.blit(dialogue, (0, spacing*7))
-    display_leaderboard(window, 10, spacing)
 
-def display_leaderboard(window, size: int, spacing: int, aa_text: bool = True) -> None:
-    screen_width, screen_height = window.get_size()
-    font_color = Colors.green
-    leaderboard = get_leaderboard(size)
-    dialogue = Globals.dialogue_font.render('Leaderboard', aa_text, font_color)
-    window.blit(dialogue, (screen_width-screen_width/10, screen_height/20)) 
-    for i in range(len(leaderboard)):
-        name = leaderboard[i]
-        dialogue = Globals.dialogue_font.render(f'{i+1}. {name}', aa_text, font_color)
-        window.blit(dialogue, (screen_width-screen_width/10, spacing*(i+1)+screen_height/20)) 
+# def display_leaderboard(window, size: int, spacing: int, aa_text: bool = True) -> None:
+#     screen_width, screen_height = window.get_size()
+#     font_color = Colors.green
+#     leaderboard = get_leaderboard(size)
+#     dialogue = Globals.dialogue_font.render('Leaderboard', aa_text, font_color)
+#     window.blit(dialogue, (screen_width-screen_width/10, screen_height/20)) 
+#     for i in range(len(leaderboard)):
+#         name = leaderboard[i]
+#         dialogue = Globals.dialogue_font.render(f'{i+1}. {name}', aa_text, font_color)
+#         window.blit(dialogue, (screen_width-screen_width/10, spacing*(i+1)+screen_height/20)) 
 
-def get_leaderboard(size: int) -> list:
-    leaderboard = []
-    Globals.players.sort(key=lambda x: x.mass(), reverse=True)
-    for player in Globals.players:
-        if len(leaderboard) < size:
-            leaderboard.append(player.name)
-    return leaderboard
+# def get_leaderboard(size: int) -> list:
+#     leaderboard = []
+#     Globals.players.sort(key=lambda x: x.mass(), reverse=True)
+#     for player in Globals.players:
+#         if len(leaderboard) < size:
+#             leaderboard.append(player.name)
+#     return leaderboard
 
 def threaded_client(conn, player_id):
     #global changes
@@ -243,28 +217,10 @@ def main():
     # # parse existing file
     # config.read('common/agar.ini')
 
-    aa_agar = True
-
-    background_color = Colors.black
-    font_color = Colors.green
-
-    screen_width, screen_height = 1280, 720
-    screen_fullscreen : bool = False
-    window = pygame.display.set_mode([screen_width, screen_height], pygame.RESIZABLE)
-    pygame.display.set_caption("Agar.io Clone Server")
     clock = pygame.time.Clock()
-
-
-    Globals.camera = Camera(window)
-
-
-    Globals.font = 'arial'
-    Globals.font_width = int(screen_width/100+1)
-    Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
 
     Globals.smooth_fix_limit = 3
 
-    Globals.players.append(player)
     for i in range(Globals.bot_count):
         Globals.players.append(Player("bot", f"bot {i+1}", Colors.red))
     for i in range(Globals.minion_count):
@@ -276,9 +232,6 @@ def main():
 
     last_time = time.time()
 
-    # for _ in range(int(Globals.max_agars/2)):
-    #     create_new_object("agar")
-
     for _ in range(int(Globals.virus_count)):
         create_new_object("virus")
 
@@ -286,7 +239,6 @@ def main():
         create_new_object("brown virus")
 
     playing = True
-    aa_text = True
 
     server = ""
     server_ip = socket.gethostbyname(server)
@@ -318,9 +270,6 @@ def main():
         start = time.time()
 
         Globals.cells.sort(key=lambda x: x.mass, reverse=False)
-        
-        window.fill(background_color)
-
 
         for p in Globals.players:
             if len(p.cells) == 0:
@@ -351,86 +300,14 @@ def main():
             if Globals.frames % placeholder == 0:
                 create_new_object("agar")
 
-        target_scale = 0
-        for thing in player.cells:
-            target_scale += thing.radius**(1/4)/10
-        
-
-        target_scale/= max(len(player.cells)**(1/1.5), 1)
-        target_scale = target_scale*720/screen_height
-
-        Globals.camera.set_scale(target_scale)
-
-
-        #Bot AI Target finding
-        # for thing in players:
-        #     if thing != player:
-        #         biggest = thing.cells[len(thing.cells)-1]
-
-        #         # for thing2 in cells:
-        #         #     if thing2.mass*1.3<biggest.mass and thing2.player != biggest.player:
-        #         #         for buggin in thing:
-        #         #             buggin.target = thing2
-        #         target = get_nearest_agar(biggest)
-        #         for cell in thing.cells:
-        #             cell.target = target
-
-        if Globals.camera.scale > 1:
-            aa_agar = False
-        else:
-            aa_agar = True
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 playing = False
                 break
-
-            if event.type == pygame.VIDEORESIZE:
-                screen_width, screen_height = window.get_size()
-                Globals.font_width = int(screen_width/100+1)
-                Globals.dialogue_font = pygame.font.SysFont(Globals.font, Globals.font_width)
-                Globals.camera.scale = target_scale
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    playing = False
-                    break
-
-                if event.key == pygame.K_SPACE:
-                    player.split()
-
-                if event.key == pygame.K_w:
-                    player.eject_mass()
-
-                if event.key == pygame.K_f:
-                    for p in Globals.players:
-                        if p.mode == "minion":
-                            p.split()
-
-                if event.key == pygame.K_g:
-                    for p in Globals.players:
-                        if p.mode == "minion":
-                            p.eject_mass()
-                if event.key == pygame.K_F11:
-                    screen_fullscreen = not screen_fullscreen
-                    if screen_fullscreen:
-                        pygame.display.set_mode((0,0), pygame.FULLSCREEN)
-                    else:
-                        pygame.display.set_mode((screen_width, screen_height), pygame.RESIZABLE)
-                    screen_width, screen_height = window.get_size()
-
-        if pygame.key.get_pressed()[pygame.K_e]:
-            for thing in player.cells:
-                if thing.mass > Globals.player_eject_min_mass and thing.mass > Globals.ejected_loss:
-                    thing.eject_mass()
-        if pygame.key.get_pressed()[pygame.K_z]:
-            player.split()
-                    
+ 
         game_tick()
-        game_draw(window, player)
 
-        display_metrics(window, screen_width/80)
-        
         Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
         Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
         Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
@@ -447,10 +324,6 @@ def main():
         Globals.objects_to_delete = set()
         Globals.objects_added = set()
 
-
-        # current_changes.cells = copy.deepcopy(Globals.cells)
-        # current_changes.players = copy.deepcopy(Globals.players) -> We only need the most recent copies anyway
-        # current_changes.ejected = copy.deepcopy(Globals.ejected)
         current_changes.cells = Globals.cells
         current_changes.players = Globals.players
         current_changes.ejected = Globals.ejected
@@ -467,7 +340,6 @@ def main():
 
  
         clock.tick(Globals.tickrate)
-        pygame.display.flip()
 
         Globals.frames += 1
         Globals.fps_ = round(1/(time.time()-start))
@@ -478,9 +350,7 @@ lock = threading.Lock()
 connected = []
 changes_to_send: dict[int, ServerChanges] = {}
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-player = Player("player", "Server", get_random_color())
 info = ServerInfo()
-#changes = ServerChanges()
 #cProfile.run('main()', sort='cumtime')
 main()
 pygame.quit()

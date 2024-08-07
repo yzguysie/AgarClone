@@ -57,12 +57,12 @@ def interpolate(dt):
     Globals.tickrate = 1/dt
     Globals.gamespeed = dt
 
-    all_objs = list(all_drawable(agars_ = False, ejected_ = True, viruses_ = False, brown_viruses_ = False, cells_ = True))
+    all_objs = list(all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = False, cells_ = False))
     for thing in all_objs:
-        thing.tick()
+        thing.tick_client()
     
     for thing in Globals.players:
-        thing.tick()    
+        thing.tick_client()    
 
 def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True):
     if agars_:
@@ -188,7 +188,7 @@ def threaded_update():
         
 last_update = time.time()
 def main():
-    global new_info, player, screen_width, last_update
+    global new_info, player, screen_width, last_update, screen_fullscreen
     frames = 0
     playing = True
     aa_text = True

@@ -6,9 +6,12 @@ class Virus(Actor):
         super().__init__(x, y, mass, color)
         self.split_mass = Globals.virus_split_mass
 
-    def tick(self):
+    def tick(self) -> None:
         self.check_colliding(Globals.cells)
         self.check_ejected(Globals.ejected)
+        self.move()
+    
+    def tick_client(self) -> None:
         self.move()
 
     def check_colliding(self, cells):

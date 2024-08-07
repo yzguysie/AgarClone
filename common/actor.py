@@ -30,8 +30,8 @@ class Actor:
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
         if not sides:
 
-            #self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
-            self.smoothradius = self.radius #FIXME only because server bugs smoothradius
+            self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
+            #self.smoothradius = self.radius #FIXME only because server bugs smoothradius
 
             #Draw Outline
             if self.outline_thickness > 0 and outline:
@@ -75,11 +75,12 @@ class Actor:
             pygame.gfxdraw.filled_polygon(window, points, self.color)
 
 
-
-
     def tick(self) -> None:
         self.move()
-        self.update_radius()        
+        self.update_radius()
+
+    def tick_client(self) -> None:
+        self.tick()
 
     def move(self) -> None:
 

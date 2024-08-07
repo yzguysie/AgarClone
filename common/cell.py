@@ -90,9 +90,15 @@ class Cell(Actor):
         if self.mass > Globals.player_max_cell_mass:
             self.split()
         self.move()
-        self.check_colliding(Globals.cells)
+        self.check_colliding()
+        self.check_consuming(Globals.cells)
         self.check_viruses(Globals.brown_viruses)
         self.check_agars(Globals.agars)
+        self.update_radius()
+
+    def tick_client(self) -> None:
+        self.move()
+        self.check_colliding()
         self.update_radius()
        
     def decay(self, rate) -> None:
@@ -135,7 +141,7 @@ class Cell(Actor):
         self.radius = math.sqrt(self.mass)
         Globals.ejected.append(e)
         
-    def check_colliding(self, cells: list["Cell"]):
+    def check_colliding(self):
         for other in self.player.cells:
             if other.id != self.id:
                 if self.touching(other):
@@ -159,6 +165,7 @@ class Cell(Actor):
                             if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
                                 self.consume(other)
 
+    def check_consuming(self, cells: list["Cell"]):
         for other in cells:
             if other.player != self.player:
                 if self.can_consume(other):

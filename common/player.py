@@ -17,6 +17,10 @@ class Player:
     def tick(self):
         for cell in self.cells:
             cell.tick()
+            
+    def tick_client(self):
+        for cell in self.cells:
+            cell.tick_client()
 
     def draw(self, window, camera):
         for cell in self.cells:
