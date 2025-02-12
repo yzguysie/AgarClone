@@ -42,6 +42,7 @@ idk
 def game_tick():
     player.update_target(Globals.camera, Globals.agars)
     info.target = player.target
+    info.minion_target = player.target
 
 def game_draw():
     target_camera_x, target_camera_y = player.calc_center_of_mass()
@@ -57,12 +58,12 @@ def interpolate(dt):
     Globals.tickrate = 1/dt
     Globals.gamespeed = dt
 
-    all_objs = list(all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = False, cells_ = False))
+    all_objs = list(all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True))
     for thing in all_objs:
         thing.tick_client()
     
-    for thing in Globals.players:
-        thing.tick_client()    
+    # for thing in Globals.players:
+    #     thing.tick_client()    
 
 def all_drawable(agars_ = True, ejected_ = True, viruses_ = True, brown_viruses_ = True, cells_ = True):
     if agars_:
@@ -130,17 +131,45 @@ def update(change: ServerChanges):
     count = 0
 
     if change == None:
-        #print("No Changes")
-        return 0
+        return
     
-    
+    # Need loop in case more than one change
     while change != None:
         one_update(change)
         Globals.players = change.players
-        Globals.cells = change.cells
         Globals.ejected = change.ejected
         Globals.viruses = change.viruses
-        Globals.brown_viruses = change.brown_viruses
+        #Globals.cells = change.cells
+        for cell in Globals.cells:
+            for c in change.cells:
+                if cell.id == c.id:
+                    cell.mass = c.mass
+                    cell.extraxspeed = c.extraxspeed
+                    cell.extrayspeed = c.extraxspeed
+                    cell.x = c.x
+                    cell.y = c.y
+                    cell.xspeed = c.xspeed
+                    cell.yspeed = c.yspeed
+                    cell.player = c.player
+                    cell.target = c.player.target
+        for c in change.cells:
+            if c.id not in [cell.id for cell in Globals.cells]:
+                Globals.cells.append(c)
+        for cell in Globals.cells:
+            if cell.id not in [c.id for c in change.cells]:
+                Globals.cells.remove(cell)
+
+        for virus in Globals.brown_viruses:
+            for v in change.brown_viruses:
+                if virus.id == v.id:
+                    virus.mass = v.mass
+        for v in change.brown_viruses:
+            if v.id not in [virus.id for virus in Globals.brown_viruses]:
+                Globals.brown_viruses.append(v)
+        for virus in Globals.brown_viruses:
+            if virus.id not in [v.id for v in change.brown_viruses]:
+                Globals.brown_viruses.remove(virus)
+        #Globals.brown_viruses = change.brown_viruses
         count += 1
         #print(f"Change {count}")
         change = change.next_batch
@@ -181,9 +210,11 @@ def threaded_update():
                     new_info = False
                     info.split = False
                     info.eject = False
+                    info.minion_split = False
+                    info.minion_eject = False
                     last_update = time.time()
         except Exception as e: 
-            print(e)
+            print(f'Exception {e} in threaded_update')
             return
         
 last_update = time.time()
@@ -201,7 +232,7 @@ def main():
         dt = time.time()-last_update
         if dt > .001:
             with lock:
-                interpolate(time.time()-last_update)
+                interpolate(dt)
                 last_update = time.time()
         new_info = True
 
@@ -245,6 +276,14 @@ def main():
                 if event.key == pygame.K_w:
                     info.eject = True
 
+                if event.key == pygame.K_s:
+                    info.minion_eject = True
+                
+                if event.key == pygame.K_d:
+                    info.minion_split = True
+
+                
+
                 if event.key == pygame.K_F11:
                     screen_fullscreen = not screen_fullscreen
                     if screen_fullscreen:
@@ -271,6 +310,7 @@ def main():
 
         delta_time = time.time()-start
         clock.tick(fps)
+        #Why is delta_time before clock tick? wtf
         if frames % int(fps/2) == 0:
             Globals.fps_ = round(1/(time.time()-start))
             last_time = time.time()

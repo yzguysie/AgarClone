@@ -18,7 +18,6 @@ import pickle
 from common.player import Player
 from common.cell import Cell
 from common.agar import Agar
-#from common.drawable import Drawable
 from common.player import Player
 from common.globals import Globals
 from common.virus import Virus
@@ -65,7 +64,7 @@ def game_tick():
 
     #player.update_target(Globals.camera, Globals.agars) # Server player has to update, clients do elsewhere
     for player_ in Globals.players:
-        if player_.mode != "player":
+        if player_.mode != "player" and player_.mode != "minion":
             player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
 
@@ -157,9 +156,13 @@ def threaded_client(conn, player_id):
     changes_to_send[player_id] = None # FIXME Could cause last change to be doubled on client (Idk bruh fml)
 
 
-    new_player = Player("player", f"player {player_id}", get_random_color())
-    Globals.players.append(new_player)
-    info.player = new_player
+    client_player = Player("player", f"player {player_id}", get_random_color())
+    for i in range(Globals.minion_count):
+        new_minion = Player("minion", f"{client_player.name}'s minion {i+1}", Colors.green)
+        new_minion.master_id = client_player.id
+        Globals.players.append(new_minion)
+    Globals.players.append(client_player)
+    info.player = client_player
     conn.send(pickle.dumps(info))
 
     while True:
@@ -171,7 +174,7 @@ def threaded_client(conn, player_id):
                 break
             else:
                 for p in Globals.players:
-                    if p.id == new_player.id:
+                    if p.id == client_player.id:
                         p.target = cl_data.target
                         for cell in p.cells:
                             cell.target = p.target
@@ -179,19 +182,28 @@ def threaded_client(conn, player_id):
                             p.split()
                         if cl_data.eject:
                             p.eject_mass()
-                #time.sleep(.05)
+                    if p.master_id and p.master_id == client_player.id:
+                        p.target = cl_data.minion_target
+                        for cell in p.cells:
+                            cell.target = cl_data.minion_target
+                        if cl_data.minion_split:
+                            p.split()
+                        if cl_data.minion_eject:
+                            p.eject_mass()                
+                #time.sleep(.1)
                 with lock:
                     bytes_to_send = pickle.dumps((changes_to_send[player_id]))
                     changes_to_send[player_id] = None
                 conn.send(bytes_to_send)
                 
-        except:
+        except Exception as e:
+            print(f'Exception {e} in threaded_client with player {client_player.name}')
             break
 
     print("Lost conection to ", conn)
     connected.remove(conn)
     conn.close()
-    Globals.players.remove(new_player)
+    Globals.players.remove(client_player)
     del changes_to_send[player_id]
     return
 
@@ -223,8 +235,6 @@ def main():
 
     for i in range(Globals.bot_count):
         Globals.players.append(Player("bot", f"bot {i+1}", Colors.red))
-    for i in range(Globals.minion_count):
-        Globals.players.append(Player("minion", f"minion {i+1}", Colors.green))
 
     player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
 

@@ -11,7 +11,7 @@ class Actor:
         self.mass = mass
         self.radius = math.sqrt(mass)
         self.smoothradius = self.radius
-        self.smoothness = .2 # Half life in seconds of the difference between true radius and radius drawn. (Higher = Smoother, Lower = Snappier, more accurate)
+        self.smoothness = .2 # Half-life in seconds of the difference between true radius and radius drawn. (Higher = Smoother, Lower = Snappier, more accurate)
         self.color = color
         self.outline_color = (self.color[0]/1.5, self.color[1]/1.5, self.color[2]/1.5)
         self.outline_thickness = 3

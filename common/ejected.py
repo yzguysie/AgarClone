@@ -29,11 +29,25 @@ class Ejected(Actor):
         if abs(self.xspeed)+abs(self.yspeed) > 0:
             self.vector = pygame.math.Vector2(self.xspeed, self.yspeed).normalize()
 
-        self.check_colliding(Globals.cells)
+        self.check_consumed(Globals.cells)
         self.check_brown(Globals.brown_viruses)
 
         # Repel other Ejected
-        for other in Globals.ejected:
+        self.check_colliding(Globals.ejected)
+
+        # Consume other ejected
+
+        # for mass in ejected:
+        #         if mass.x != self.x and mass.y != self.y:
+        #                 if ((self.x-mass.x)**2+(self.y-mass.y)**2) < (self.radius/2+mass.radius/2)**2 and mass.id not in objects_to_delete and self.id not in objects_to_delete and self.mass >= mass.mass:
+        #                         self.consume(mass)
+
+    def tick_client(self) -> None:
+        self.move()
+        self.check_colliding(Globals.ejected)
+
+    def check_colliding(self, ejected):
+        for other in ejected:
             if other.id != self.id:
                 if self.touching(other):
                     vector = other.get_vector(other = self)
@@ -42,16 +56,9 @@ class Ejected(Actor):
                     self.y += vector.y*velocity/2
                     other.x -= vector.x*velocity/2
                     other.y -= vector.y*velocity/2
-        
-        # Consume other ejected
-
-        # for mass in ejected:
-        #         if mass.x != self.x and mass.y != self.y:
-        #                 if ((self.x-mass.x)**2+(self.y-mass.y)**2) < (self.radius/2+mass.radius/2)**2 and mass.id not in objects_to_delete and self.id not in objects_to_delete and self.mass >= mass.mass:
-        #                         self.consume(mass)
 
 
-    def check_colliding(self, cells):
+    def check_consumed(self, cells):
         #if time.time() - self.time_created >= 0.3:
         for thing in cells:
             if thing.can_consume(self):

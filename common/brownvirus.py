@@ -27,9 +27,10 @@ class BrownVirus(Actor):
             self.spit() 
 
         self.check_consume()
+        self.update_radius()
     
     def tick_client(self) -> None:
-        pass
+        self.update_radius()
 
     def spit(self):
         spit_mult = 1

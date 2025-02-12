@@ -10,7 +10,7 @@ class Player:
         self.color = color
         self.max_cells = 16
         self.min_eject_mass = Globals.player_eject_min_mass
-        
+        self.master_id: int = None
         self.target = (0, 0)
         self.cells = []
     

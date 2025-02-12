@@ -10,9 +10,11 @@ class Virus(Actor):
         self.check_colliding(Globals.cells)
         self.check_ejected(Globals.ejected)
         self.move()
+        self.update_radius()
     
     def tick_client(self) -> None:
         self.move()
+        self.update_radius()
 
     def check_colliding(self, cells):
         for cell in cells:
