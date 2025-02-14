@@ -159,6 +159,8 @@ def threaded_client(conn, player_id):
     client_player = Player("player", f"player {player_id}", get_random_color())
     for i in range(Globals.minion_count):
         new_minion = Player("minion", f"{client_player.name}'s minion {i+1}", Colors.green)
+        if Globals.minion_count == 1:
+            new_minion.name = f"{client_player.name}'s minion"
         new_minion.master_id = client_player.id
         Globals.players.append(new_minion)
     Globals.players.append(client_player)
@@ -204,6 +206,15 @@ def threaded_client(conn, player_id):
     connected.remove(conn)
     conn.close()
     Globals.players.remove(client_player)
+    # Need to remove list b/c cant edit list while iterating it
+    to_remove = []
+    for player in Globals.players:
+        if player.master_id and player.master_id == client_player.id:
+            to_remove.append(player)
+
+    for player in to_remove:
+        Globals.players.remove(player)
+            
     del changes_to_send[player_id]
     return
 

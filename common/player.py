@@ -8,7 +8,7 @@ class Player:
         self.mode = mode
         self.name = name
         self.color = color
-        self.max_cells = 16
+        self.max_cells = Globals.player_max_cells
         self.min_eject_mass = Globals.player_eject_min_mass
         self.master_id: int = None
         self.target = (0, 0)

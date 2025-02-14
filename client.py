@@ -154,6 +154,7 @@ def update(change: ServerChanges):
                     cell.target = c.player.target
         for c in change.cells:
             if c.id not in [cell.id for cell in Globals.cells]:
+                c.smoothradius = c.radius
                 Globals.cells.append(c)
         for cell in Globals.cells:
             if cell.id not in [c.id for c in change.cells]:
