@@ -5,11 +5,12 @@ import time
 import pygame
 import math
 class Cell(Actor):
-   
+    CONSUMER = True
+    CONSUMABLE = True
+    ELASTICITY = 0
     def __init__(self, x, y, mass, color, player):
         super().__init__(x, y, mass, color)
-        self.consumer = True
-        self.consumable = True
+
         self.extraxspeed = 0
         self.extrayspeed = 0
         self.slow_zone = 10
@@ -20,7 +21,6 @@ class Cell(Actor):
         self.smoothradius = self.radius
         self.player = player
         self.target = player.target
-        self.elasticity = 0 # Proportion of momentum conserved after bouncing
 
 
         self.time_created = time.time()
@@ -112,7 +112,7 @@ class Cell(Actor):
 
     def consume_virus(self, virus: Actor) -> None:
         self.mass += virus.mass
-        Globals.objects_to_delete.add(virus.id)
+        Globals.objects_to_delete.add(virus.ID)
         cells_affected = [self]
         for _ in range(16):
             for cell in cells_affected:
@@ -121,7 +121,7 @@ class Cell(Actor):
 
     # def consume_brown_virus(self, virus: Actor) -> None:
     #     self.mass += virus.mass
-    #     Globals.objects_to_delete.add(virus.id)
+    #     Globals.objects_to_delete.add(virus.ID)
     #     cells_affected = [self]
     #     for _ in range(16):
     #         for cell in cells_affected:
@@ -143,7 +143,7 @@ class Cell(Actor):
         
     def check_colliding(self):
         for other in self.player.cells:
-            if other.id != self.id:
+            if other.ID != self.ID:
                 if self.touching(other):
                     # If cells are too young, repel each other
                     if (time.time()-other.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4) or time.time()-self.time_created < Globals.player_recombine_time*(self.mass**(1/4)/4)) and other.player == self.player:
@@ -162,7 +162,7 @@ class Cell(Actor):
                     # If cells are old enough, recombine
                     else:
                         if self.overlapping(other):
-                            if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
+                            if self.ID not in Globals.objects_to_delete and other.ID not in Globals.objects_to_delete:
                                 self.consume(other)
 
     def check_consuming(self, cells: list["Cell"]):

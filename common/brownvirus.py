@@ -5,22 +5,23 @@ from common.actor import Actor
 from common.agar import Agar
 
 class BrownVirus(Actor):
+    CONSUMER = True
+    CONSUMABLE = True
     def __init__(self, x, y, mass, color):
         super().__init__(x, y, mass, color)
-        self.consumer = True
-        self.spit_rate = 120
-        self.startmass = mass
+        self.spit_rate = 120 # Rate at which virus ejects agars, times/sec
+        self.target_mass = mass 
         self.smoothradius = self.radius
 
     def tick(self):
         spit_rate = 120
         if 1/Globals.gamespeed < spit_rate:
             for i in range(round(spit_rate*Globals.gamespeed)):
-                if self.mass > self.startmass:
+                if self.mass > self.target_mass:
                     self.spit()
         else:
             if (Globals.frames%(round(1/Globals.gamespeed/spit_rate)) == 0):
-                if self.mass > self.startmass:
+                if self.mass > self.target_mass:
                     self.spit()
         
         if random.randint(0, max(int(1/Globals.gamespeed), 1)) == 0 and len(Globals.agars) < Globals.max_agars:
@@ -47,7 +48,7 @@ class BrownVirus(Actor):
         Globals.agars.add(spatted)
         Globals.objects_added.add(spatted)
         self.mass -= spatted.mass/spit_mult
-        self.mass = max(self.mass, self.startmass)
+        self.mass = max(self.mass, self.target_mass)
 
     def colliding(self, thing):
         return (self.x-thing.x)**2+(self.y-thing.y)**2 < (self.radius/4+thing.radius)**2

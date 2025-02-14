@@ -51,7 +51,7 @@ def game_tick():
     #             target_cell = cell.target
     #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
                 
-    #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
+    #             if target_cell.mass*2.6 < cell.mass and target_cell.ID not in objects_to_delete:
     #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
     #                         for bruh in bot:
     #                                 bruh.split()
@@ -161,7 +161,7 @@ def threaded_client(conn, player_id):
         new_minion = Player("minion", f"{client_player.name}'s minion {i+1}", Colors.green)
         if Globals.minion_count == 1:
             new_minion.name = f"{client_player.name}'s minion"
-        new_minion.master_id = client_player.id
+        new_minion.master_id = client_player.ID
         Globals.players.append(new_minion)
     Globals.players.append(client_player)
     info.player = client_player
@@ -176,7 +176,7 @@ def threaded_client(conn, player_id):
                 break
             else:
                 for p in Globals.players:
-                    if p.id == client_player.id:
+                    if p.ID == client_player.ID:
                         p.target = cl_data.target
                         for cell in p.cells:
                             cell.target = p.target
@@ -184,7 +184,7 @@ def threaded_client(conn, player_id):
                             p.split()
                         if cl_data.eject:
                             p.eject_mass()
-                    if p.master_id and p.master_id == client_player.id:
+                    if p.master_id and p.master_id == client_player.ID:
                         p.target = cl_data.minion_target
                         for cell in p.cells:
                             cell.target = cl_data.minion_target
@@ -209,7 +209,7 @@ def threaded_client(conn, player_id):
     # Need to remove list b/c cant edit list while iterating it
     to_remove = []
     for player in Globals.players:
-        if player.master_id and player.master_id == client_player.id:
+        if player.master_id and player.master_id == client_player.ID:
             to_remove.append(player)
 
     for player in to_remove:
@@ -298,7 +298,7 @@ def main():
                     #FIXME - make cells never spawn on viruses or in other cells
                     if len(Globals.ejected) > 0:
                         e = Globals.ejected[0]
-                        Globals.objects_to_delete.add(e.id)
+                        Globals.objects_to_delete.add(e.ID)
                         new_cell = Cell(e.x, e.y, Globals.player_start_mass, p.color, p)
                     else:
                         new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
@@ -329,14 +329,14 @@ def main():
  
         game_tick()
 
-        Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
-        Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
-        Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
-        Globals.viruses = [virus for virus in Globals.viruses if virus.id not in Globals.objects_to_delete]
-        Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
+        Globals.agars = set([agar for agar in Globals.agars if agar.ID not in Globals.objects_to_delete])
+        Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.ID not in Globals.objects_to_delete]
+        Globals.cells = [cell for cell in Globals.cells if cell.ID not in Globals.objects_to_delete]
+        Globals.viruses = [virus for virus in Globals.viruses if virus.ID not in Globals.objects_to_delete]
+        Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.ID not in Globals.objects_to_delete]
         
         for p in Globals.players:
-            p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
+            p.cells = [cell for cell in p.cells if cell.ID not in Globals.objects_to_delete]
 
         current_changes = ServerChanges()
 

@@ -142,7 +142,7 @@ def update(change: ServerChanges):
         #Globals.cells = change.cells
         for cell in Globals.cells:
             for c in change.cells:
-                if cell.id == c.id:
+                if cell.ID == c.ID:
                     cell.mass = c.mass
                     cell.extraxspeed = c.extraxspeed
                     cell.extrayspeed = c.extraxspeed
@@ -153,22 +153,22 @@ def update(change: ServerChanges):
                     cell.player = c.player
                     cell.target = c.player.target
         for c in change.cells:
-            if c.id not in [cell.id for cell in Globals.cells]:
+            if c.ID not in [cell.ID for cell in Globals.cells]:
                 c.smoothradius = c.radius
                 Globals.cells.append(c)
         for cell in Globals.cells:
-            if cell.id not in [c.id for c in change.cells]:
+            if cell.ID not in [c.ID for c in change.cells]:
                 Globals.cells.remove(cell)
 
         for virus in Globals.brown_viruses:
             for v in change.brown_viruses:
-                if virus.id == v.id:
+                if virus.ID == v.ID:
                     virus.mass = v.mass
         for v in change.brown_viruses:
-            if v.id not in [virus.id for virus in Globals.brown_viruses]:
+            if v.ID not in [virus.ID for virus in Globals.brown_viruses]:
                 Globals.brown_viruses.append(v)
         for virus in Globals.brown_viruses:
-            if virus.id not in [v.id for v in change.brown_viruses]:
+            if virus.ID not in [v.ID for v in change.brown_viruses]:
                 Globals.brown_viruses.remove(virus)
         #Globals.brown_viruses = change.brown_viruses
         count += 1
@@ -196,9 +196,9 @@ def one_update(update: ServerChanges):
         #     Globals.viruses.append(obj)
         # elif type(obj) == BrownVirus:
         #     Globals.brown_viruses.append(obj)
-    Globals.agars = set([agar for agar in Globals.agars if agar.id not in update.objects_deleted])
-    # Globals.viruses = [virus for virus in Globals.viruses if virus.id not in update.objects_deleted]
-    # Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.id not in update.objects_deleted
+    Globals.agars = set([agar for agar in Globals.agars if agar.ID not in update.objects_deleted])
+    # Globals.viruses = [virus for virus in Globals.viruses if virus.ID not in update.objects_deleted]
+    # Globals.brown_viruses = [agar for agar in Globals.brown_viruses if agar.ID not in update.objects_deleted
 
 def threaded_update():
     global new_info, last_update
@@ -238,7 +238,7 @@ def main():
         new_info = True
 
         for p in Globals.players:
-            if p.id == player_id:
+            if p.ID == player_id:
                 player = p 
 
         target_scale = 0
@@ -426,7 +426,7 @@ info = ClientInfo()
 n = Network()
 info_ = n.getId()
 use_data(info_)
-player_id = info_.player.id
+player_id = info_.player.ID
 
 delta_time = 1/Globals.tickrate
 new_info = False

@@ -3,7 +3,8 @@ from common.actor import Actor
 import random
 
 class Agar(Actor):
-
+    CONSUMABLE = True
+    CONSUMER = False
     def draw(self, window, camera):
         super().draw(window, camera, aa=True, outline=True)
 

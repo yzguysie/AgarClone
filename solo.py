@@ -122,7 +122,7 @@ def game_tick():
     #             target_cell = cell.target
     #             #Bots will split for their target if they can, (only if they are in two or less pieces - should add this, also why is this done for each cell wtf)
                 
-    #             if target_cell.mass*2.6 < cell.mass and target_cell.id not in objects_to_delete:
+    #             if target_cell.mass*2.6 < cell.mass and target_cell.ID not in objects_to_delete:
     #                     if (cell.x-target_cell.x)**2+(cell.y-target_cell.y)**2 < cell.radius**2*2:
     #                         for bruh in bot:
     #                                 bruh.split()
@@ -277,7 +277,7 @@ objects = []
 
 pygame.display.set_caption("Agar.io Clone")
 
-smoothness = 15
+SMOOTHNESS = 15
 
 
 smooth_fix_limit = 4
@@ -465,12 +465,12 @@ while playing:
     frames += 1
 
 
-    Globals.agars = set([agar for agar in Globals.agars if agar.id not in Globals.objects_to_delete])
-    Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.id not in Globals.objects_to_delete]
-    Globals.cells = [cell for cell in Globals.cells if cell.id not in Globals.objects_to_delete]
-    Globals.viruses = [virus for virus in Globals.viruses if virus.id not in Globals.objects_to_delete]
-    Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.id not in Globals.objects_to_delete]
-    objects = [obj for obj in objects if obj.id not in Globals.objects_to_delete]
+    Globals.agars = set([agar for agar in Globals.agars if agar.ID not in Globals.objects_to_delete])
+    Globals.ejected = [ejected_mass for ejected_mass in Globals.ejected if ejected_mass.ID not in Globals.objects_to_delete]
+    Globals.cells = [cell for cell in Globals.cells if cell.ID not in Globals.objects_to_delete]
+    Globals.viruses = [virus for virus in Globals.viruses if virus.ID not in Globals.objects_to_delete]
+    Globals.brown_viruses = [brown_virus for brown_virus in Globals.brown_viruses if brown_virus.ID not in Globals.objects_to_delete]
+    objects = [obj for obj in objects if obj.ID not in Globals.objects_to_delete]
     for cell in Globals.cells:
         if cell.mass > player_max_cell_mass:
             cell.split()
@@ -479,7 +479,7 @@ while playing:
         if len(thing) < 1:
              Globals.cells.append(Cell(random.randint(-border_width, border_width), random.randint(-border_height, border_height), player_start_mass, Colors.red, Globals.players[i]))
     for p in Globals.players:
-        p.cells = [cell for cell in p.cells if cell.id not in Globals.objects_to_delete]
+        p.cells = [cell for cell in p.cells if cell.ID not in Globals.objects_to_delete]
 
     Globals.objects_to_delete = set()
 

@@ -2,6 +2,8 @@ from common.actor import Actor
 from common.globals import Globals
 import pygame
 class Virus(Actor):
+    CONSUMER = False
+    CONSUMABLE = True
     def __init__(self, x, y, mass, color):
         super().__init__(x, y, mass, color)
         self.split_mass = Globals.virus_split_mass
@@ -34,7 +36,7 @@ class Virus(Actor):
     def push(self, e):
         self.xspeed += e.vector.x*50
         self.yspeed += e.vector.y*50
-        Globals.objects_to_delete.add(e.id)
+        Globals.objects_to_delete.add(e.ID)
 
     def split(self, e):
         new_virus = Virus(self.x, self.y, Globals.virus_mass, self.color)

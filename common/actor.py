@@ -3,23 +3,29 @@ import math
 from common.globals import Globals
 
 class Actor:
+    s_next_actor_id: int = 0 # Used when deciding actor's ids
+    SMOOTHNESS: float = 0.2 # Half-life in seconds of the difference between true radius and radius drawn. (Higher = Smoother, Lower = Snappier, more accurate)
+    ELASTICITY: float = 0.5 # Proportion of momentum conserved after bouncing
+    CONSUMER: bool
+    CONSUMABLE: bool
     def __init__(self, x : float, y : float, mass : float, color: tuple):
-        self.x = x
-        self.y = y
-        self.xspeed = 0
-        self.yspeed = 0
-        self.mass = mass
-        self.radius = math.sqrt(mass)
-        self.smoothradius = self.radius
-        self.smoothness = .2 # Half-life in seconds of the difference between true radius and radius drawn. (Higher = Smoother, Lower = Snappier, more accurate)
-        self.color = color
-        self.outline_color = (self.color[0]/1.5, self.color[1]/1.5, self.color[2]/1.5)
-        self.outline_thickness = 3
-        self.id = Globals.drawable_count
-        Globals.drawable_count += 1
-        self.consumer = False
-        self.consumable = True
-        self.elasticity = .5 # Proportion of momentum conserved after bouncing
+        self.ID: int = Actor.s_next_actor_id
+        Actor.s_next_actor_id += 1
+
+        self.x: float = x
+        self.y: float = y
+        self.mass: float = mass
+        self.color: tuple[int, int, int] = color
+
+        self.xspeed: float = 0
+        self.yspeed: float = 0
+
+        self.radius: float = math.sqrt(mass)
+        self.smoothradius: float = self.radius
+
+        self.outline_color: tuple[int, int, int] = (self.color[0]/1.5, self.color[1]/1.5, self.color[2]/1.5)
+        self.outline_thickness: int = 3
+
     
     def update_radius(self):
         self.radius = math.sqrt(self.mass)
@@ -30,7 +36,7 @@ class Actor:
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
         if not sides:
 
-            self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.smoothness, 1)
+            self.smoothradius += (self.radius - self.smoothradius)/max(Globals.fps_*self.SMOOTHNESS, 1)
             #self.smoothradius = self.radius #FIXME only because server bugs smoothradius
 
             #Draw Outline
@@ -98,17 +104,17 @@ class Actor:
     def check_borders(self) -> None:
         if self.x > Globals.border_width:
             self.x = Globals.border_width
-            self.xspeed *= -self.elasticity
+            self.xspeed *= -self.ELASTICITY
         if self.x < -Globals.border_width:
             self.x = -Globals.border_width
-            self.xspeed *= -self.elasticity
+            self.xspeed *= -self.ELASTICITY
 
         if self.y > Globals.border_height:
             self.y = Globals.border_height
-            self.yspeed *= -self.elasticity
+            self.yspeed *= -self.ELASTICITY
         if self.y < -Globals.border_height:
             self.y = -Globals.border_height
-            self.yspeed *= -self.elasticity
+            self.yspeed *= -self.ELASTICITY
 
     def get_vector(self, pos: tuple = None, other: "Actor" = None, normalize = True) -> pygame.math.Vector2:
         if pos:
@@ -134,18 +140,18 @@ class Actor:
         return math.pow(self.x-other.x, 2) + math.pow(self.y-other.y, 2) < math.pow(self.radius-other.radius/3, 2)
     
     def can_consume(self, other: "Actor") -> bool:
-        if other.consumable and other.id != self.id:
-            if self.id not in Globals.objects_to_delete and other.id not in Globals.objects_to_delete:
+        if other.CONSUMABLE and other.ID != self.ID:
+            if self.ID not in Globals.objects_to_delete and other.ID not in Globals.objects_to_delete:
                 return self.mass > other.mass*1.3 and self.overlapping(other)
         return False
 
     def check_consume(self) -> None:
         global objects
-        if self.consumer:
+        if self.CONSUMER:
             for obj in Globals.all_drawable(agars_ = False):
                 if self.can_consume(obj):
                     self.consume(obj)
 
     def consume(self, other: "Actor") -> None:
         self.mass += other.mass
-        Globals.objects_to_delete.add(other.id)
+        Globals.objects_to_delete.add(other.ID)

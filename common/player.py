@@ -2,9 +2,10 @@ import pygame
 from common.globals import Globals
 import math
 class Player:
+    s_next_player_id: int = 0
     def __init__(self, mode: str, name: str, color: tuple [int, int, int]):
-        self.id = Globals.drawable_count
-        Globals.drawable_count += 1
+        self.ID = Player.s_next_player_id
+        Player.s_next_player_id += 1
         self.mode = mode
         self.name = name
         self.color = color
@@ -38,7 +39,7 @@ class Player:
                 cell.eject_mass()
 
     def mass(self) -> float:
-        cells = [cell for cell in self.cells if cell.id not in Globals.objects_to_delete]
+        cells = [cell for cell in self.cells if cell.ID not in Globals.objects_to_delete]
         return sum(cell.mass for cell in self.cells)
             
 

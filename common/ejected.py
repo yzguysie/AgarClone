@@ -6,7 +6,8 @@ import pygame
 import time
 import random
 class Ejected(Actor):
-
+    CONSUMABLE = True
+    CONSUMER = False
     def __init__(self, cell: Actor):
         super().__init__(cell.x, cell.y, Globals.ejected_size, cell.color)
        
@@ -39,7 +40,7 @@ class Ejected(Actor):
 
         # for mass in ejected:
         #         if mass.x != self.x and mass.y != self.y:
-        #                 if ((self.x-mass.x)**2+(self.y-mass.y)**2) < (self.radius/2+mass.radius/2)**2 and mass.id not in objects_to_delete and self.id not in objects_to_delete and self.mass >= mass.mass:
+        #                 if ((self.x-mass.x)**2+(self.y-mass.y)**2) < (self.radius/2+mass.radius/2)**2 and mass.ID not in objects_to_delete and self.ID not in objects_to_delete and self.mass >= mass.mass:
         #                         self.consume(mass)
 
     def tick_client(self) -> None:
@@ -48,7 +49,7 @@ class Ejected(Actor):
 
     def check_colliding(self, ejected):
         for other in ejected:
-            if other.id != self.id:
+            if other.ID != self.ID:
                 if self.touching(other):
                     vector = other.get_vector(other = self)
                     velocity = ((self.radius+other.radius)-self.distance_to(other))*max(.5, Globals.gamespeed*5) # So they wont repel too much (looks kind of like soft-body)
