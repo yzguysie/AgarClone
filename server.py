@@ -64,7 +64,7 @@ def game_tick():
 
     #player.update_target(Globals.camera, Globals.agars) # Server player has to update, clients do elsewhere
     for player_ in Globals.players:
-        if player_.mode != "player" and player_.mode != "minion":
+        if player_.mode == Player.BOT:
             player_.update_target(Globals.camera, Globals.agars)
         player_.tick()
 
@@ -156,9 +156,9 @@ def threaded_client(conn, player_id):
     changes_to_send[player_id] = None # FIXME Could cause last change to be doubled on client (Idk bruh fml)
 
 
-    client_player = Player("player", f"player {player_id}", get_random_color())
+    client_player = Player(Player.PLAYER, f"player {player_id}", get_random_color())
     for i in range(Globals.minion_count):
-        new_minion = Player("minion", f"{client_player.name}'s minion {i+1}", Colors.green)
+        new_minion = Player(Player.MINION, f"{client_player.name}'s minion {i+1}", Colors.green)
         if Globals.minion_count == 1:
             new_minion.name = f"{client_player.name}'s minion"
         new_minion.master_id = client_player.ID
@@ -245,9 +245,7 @@ def main():
     Globals.smooth_fix_limit = 3
 
     for i in range(Globals.bot_count):
-        Globals.players.append(Player("bot", f"bot {i+1}", Colors.red))
-
-    player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
+        Globals.players.append(Player(Player.BOT, f"bot {i+1}", Colors.red))
 
     #fps_ = fps
 
@@ -294,7 +292,7 @@ def main():
 
         for p in Globals.players:
             if len(p.cells) == 0:
-                if p.mode == "player":
+                if p.mode == Player.PLAYER:
                     #FIXME - make cells never spawn on viruses or in other cells
                     if len(Globals.ejected) > 0:
                         e = Globals.ejected[0]
@@ -302,7 +300,7 @@ def main():
                         new_cell = Cell(e.x, e.y, Globals.player_start_mass, p.color, p)
                     else:
                         new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.player_start_mass, p.color, p)
-                elif p.mode == "minion":
+                elif p.mode == Player.MINION:
                     new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.minion_start_mass, p.color, p)
                 else:
                     new_cell = Cell(random.randint(-Globals.border_width, Globals.border_width), random.randint(-Globals.border_height, Globals.border_height), Globals.bot_start_mass, p.color, p)

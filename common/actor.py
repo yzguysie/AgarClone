@@ -27,11 +27,11 @@ class Actor:
         self.outline_thickness: int = 3
 
     
-    def update_radius(self):
+    def update_radius(self) -> None:
         self.radius = math.sqrt(self.mass)
 
 
-    def draw(self, window, camera, aa=True, outline=True, sides: int = None) -> None:
+    def draw(self, window: pygame.Surface, camera, aa: bool=True, outline: bool=True, sides: int=None) -> None:
         self.radius = math.sqrt(self.mass)
         self.outline_thickness = round(math.sqrt(self.smoothradius/Globals.camera.scale)/2)
         if not sides:

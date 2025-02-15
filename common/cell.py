@@ -8,27 +8,24 @@ class Cell(Actor):
     CONSUMER = True
     CONSUMABLE = True
     ELASTICITY = 0
+    SPEED: float = Globals.player_speed
     def __init__(self, x, y, mass, color, player):
         super().__init__(x, y, mass, color)
 
-        self.extraxspeed = 0
-        self.extrayspeed = 0
-        self.slow_zone = 10
-        self.speed = Globals.player_speed
-        self.xspeed = 0
-        self.yspeed = 0
-        self.inertia = 5
-        self.smoothradius = self.radius
+        self.extraxspeed: float = 0
+        self.extrayspeed: float = 0
+        self.slow_zone: int = 10
+        #self.inertia = 5
         self.player = player
-        self.target = player.target
+        self.target: tuple[float, float] = player.target
 
 
-        self.time_created = time.time()
+        self.time_created: float = time.time()
 
-    def draw(self, window, camera):
+    def draw(self, window, camera) -> None:
         super().draw(window,camera)
 
-        player_font_width = int(self.smoothradius/camera.scale/2+1)
+        player_font_width: int = int(self.smoothradius/camera.scale/2+1)
         dialogue_font = pygame.font.SysFont(Globals.font, player_font_width)
         
         # Draw Player Name
@@ -42,7 +39,7 @@ class Cell(Actor):
         window.blit(dialogue, dialogue_rect)
 
 
-    def move(self):
+    def move(self) -> None:
         # TODO - use drawable get_vector() method, but we need the velocity/distance, so wtf
         target_x, target_y = self.player.target
         xdiff = target_x-self.x
@@ -53,8 +50,8 @@ class Cell(Actor):
         velocity = min(self.slow_zone, math.sqrt(xdiff**2 + ydiff**2))*10
 
 
-        self.xspeed = vector.x*velocity*self.speed
-        self.yspeed = vector.y*velocity*self.speed
+        self.xspeed = vector.x*velocity*Cell.SPEED
+        self.yspeed = vector.y*velocity*Cell.SPEED
 
         self.x += (self.xspeed+self.extraxspeed)/math.sqrt(self.radius)*Globals.gamespeed
         self.y += (self.yspeed+self.extrayspeed)/math.sqrt(self.radius)*Globals.gamespeed
@@ -65,7 +62,7 @@ class Cell(Actor):
 
         self.check_borders()
 
-    def split(self, extra_speed = True):
+    def split(self, extra_speed = True) -> None:
         if len(self.player.cells) > Globals.player_max_cells or self.mass < Globals.player_split_min_mass:
             return None
         
@@ -141,7 +138,7 @@ class Cell(Actor):
         self.radius = math.sqrt(self.mass)
         Globals.ejected.append(e)
         
-    def check_colliding(self):
+    def check_colliding(self) -> None:
         for other in self.player.cells:
             if other.ID != self.ID:
                 if self.touching(other):
@@ -165,7 +162,7 @@ class Cell(Actor):
                             if self.ID not in Globals.objects_to_delete and other.ID not in Globals.objects_to_delete:
                                 self.consume(other)
 
-    def check_consuming(self, cells: list["Cell"]):
+    def check_consuming(self, cells: list["Cell"]) -> None:
         for other in cells:
             if other.player != self.player:
                 if self.can_consume(other):

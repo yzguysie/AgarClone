@@ -96,7 +96,7 @@ def display_metrics(window, spacing: int, aa_text: bool = True):
     font_color = Colors.green
     dialogue = Globals.dialogue_font.render(f"Fps: {Globals.fps_}", aa_text, font_color)
     window.blit(dialogue, (0, 0))
-    dialogue = Globals.dialogue_font.render(f"Mass: {round(player.mass())}", aa_text, font_color)
+    dialogue = Globals.dialogue_font.render(f"Mass: {round(player.get_mass())}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*3))
     dialogue = Globals.dialogue_font.render(f"Players:  {len(Globals.players)}", aa_text, font_color)
     window.blit(dialogue, (0, spacing*4))
@@ -121,7 +121,7 @@ def display_leaderboard(window, size: int, spacing: int, aa_text: bool = True) -
 
 def get_leaderboard(size: int) -> list:
     leaderboard = []
-    Globals.players.sort(key=lambda x: x.mass(), reverse=True)
+    Globals.players.sort(key=lambda x: x.get_mass(), reverse=True)
     for player in Globals.players:
         if len(leaderboard) < size:
             leaderboard.append(player.name)
@@ -379,7 +379,7 @@ minion_start_mass = config.getint('settings', 'minion_start_mass')
 
 screen_width, screen_height = 1280, 720
 screen_fullscreen: bool = False
-window = pygame.display.set_mode([screen_width, screen_height], pygame.RESIZABLE)
+window: pygame.Surface = pygame.display.set_mode([screen_width, screen_height], pygame.RESIZABLE)
 clock = pygame.time.Clock()
 pygame.display.set_caption("Agar.io Clone")
 
@@ -401,10 +401,9 @@ font = 'arial'
 font_width = int(screen_width/100+1)
 dialogue_font = pygame.font.SysFont(font, font_width)
 
-player = Player("player", "Error", Colors.blue)
+player = Player(Player.PLAYER, "Error", Colors.blue)
 Globals.players.append(player)
 
-player_names = ["Player", "Bot 1", "Bot 2", "Bot 3", "Bot 4", "Bot 5", "Bot 6", "Bot 7", "Bot 8", "Bot 9", "Bot 10"]
 
 fps_ = fps
 

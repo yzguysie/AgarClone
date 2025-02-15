@@ -3,47 +3,52 @@ from common.globals import Globals
 import math
 class Player:
     s_next_player_id: int = 0
-    def __init__(self, mode: str, name: str, color: tuple [int, int, int]):
+    PLAYER: int = 0
+    BOT: int = 1
+    MINION: int = 2
+    def __init__(self, mode: int, name: str, color: tuple [int, int, int]):
         self.ID = Player.s_next_player_id
         Player.s_next_player_id += 1
-        self.mode = mode
-        self.name = name
-        self.color = color
-        self.max_cells = Globals.player_max_cells
-        self.min_eject_mass = Globals.player_eject_min_mass
+        # TODO - Make player modes an Enum
+        self.mode: int = mode
+        self.name: str = name
+        self.color: tuple[int, int, int] = color
+        self.max_cells: int = Globals.player_max_cells
+        self.min_eject_mass: int = Globals.player_eject_min_mass
         self.master_id: int = None
-        self.target = (0, 0)
+        self.target: tuple[float, float] = (0, 0)
         self.cells = []
     
-    def tick(self):
+    def tick(self) -> None:
         for cell in self.cells:
             cell.tick()
             
-    def tick_client(self):
+    def tick_client(self) -> None:
         for cell in self.cells:
             cell.tick_client()
 
-    def draw(self, window, camera):
+    def draw(self, window, camera) -> None:
         for cell in self.cells:
             cell.draw(window, camera)
 
-    def split(self):
+    def split(self) -> None:
         for i in range(len(self.cells)):
             if len(self.cells) < self.max_cells:
                 cell = self.cells[i]
                 cell.split()
 
-    def eject_mass(self):
+    def eject_mass(self) -> None:
         for cell in self.cells:
             if cell.mass > self.min_eject_mass:
                 cell.eject_mass()
 
-    def mass(self) -> float:
+    def get_mass(self) -> float:
         cells = [cell for cell in self.cells if cell.ID not in Globals.objects_to_delete]
         return sum(cell.mass for cell in self.cells)
             
 
-    def calc_center_of_mass(self):
+    def calc_center_of_mass(self) -> tuple[float, float]:
+        #TODO - Wtf is this blud
         try:
             center_x = 0
             center_y = 0
@@ -59,13 +64,13 @@ class Player:
                 
 
     def update_target(self, camera, agars):
-        if self.mode == "player" or self.mode == "minion":
+        if self.mode == Player.PLAYER or self.mode == Player.MINION:
             x, y = pygame.mouse.get_pos()
             target = (x+camera.x)*camera.scale, (y+camera.y)*camera.scale
             target = camera.get_x(x), camera.get_y(y)
             
         
-        elif self.mode == "bot":
+        elif self.mode == Player.BOT:
             nearest_agar = self.get_nearest_obj(agars)
             target = nearest_agar.x, nearest_agar.y
 
